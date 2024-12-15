@@ -20,6 +20,7 @@
             android:backgroundTint="@color/white"
             android:insetTop="0dp"
             android:insetBottom="0dp"
+            android:outlineProvider="none"
             app:cornerRadius="0dp"
             app:icon="@drawable/back"
             app:iconTint="@color/black_app" />
@@ -89,10 +90,12 @@
                 android:text="@string/share_app"
                 android:textColor="@color/black"
                 android:textSize="@dimen/secondary_text_size" />
+
             <FrameLayout
                 android:layout_width="@dimen/icon_wrapper_size"
                 android:layout_height="match_parent"
                 android:layout_gravity="end">
+
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -116,10 +119,12 @@
                 android:text="@string/get_support"
                 android:textColor="@color/black"
                 android:textSize="@dimen/secondary_text_size" />
+
             <FrameLayout
                 android:layout_width="@dimen/icon_wrapper_size"
                 android:layout_height="match_parent"
                 android:layout_gravity="end">
+
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -144,10 +149,12 @@
                 android:text="@string/user_agreement"
                 android:textColor="@color/black"
                 android:textSize="@dimen/secondary_text_size" />
+
             <FrameLayout
                 android:layout_width="@dimen/icon_wrapper_size"
                 android:layout_height="match_parent"
                 android:layout_gravity="end">
+
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"

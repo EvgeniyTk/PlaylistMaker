@@ -35,6 +35,8 @@
         android:paddingEnd="@dimen/padding_from_edges">
 
         <Button
+            android:foreground="?attr/selectableItemBackground"
+            android:id="@+id/search"
             android:layout_width="match_parent"
             android:layout_height="@dimen/height_button"
             android:layout_marginBottom="@dimen/margin_button"
@@ -53,6 +55,8 @@
             app:iconTint="@color/black_app" />
 
         <Button
+            android:foreground="?attr/selectableItemBackground"
+            android:id="@+id/library"
             android:layout_width="match_parent"
             android:layout_height="@dimen/height_button"
             android:layout_marginBottom="@dimen/margin_button"
@@ -71,6 +75,8 @@
             app:iconTint="@color/black_app" />
 
         <Button
+            android:foreground="?attr/selectableItemBackground"
+            android:id="@+id/settings"
             android:layout_width="match_parent"
             android:layout_height="@dimen/height_button"
             android:layout_weight="1"
