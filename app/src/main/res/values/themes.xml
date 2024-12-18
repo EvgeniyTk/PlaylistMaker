@@ -6,6 +6,7 @@
     </style>
 
     <style name="Theme.PlaylistMaker" parent="Base.Theme.PlaylistMaker" />
+
     <style name="Toolbar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -38,5 +39,14 @@
         <item name="iconGravity">textStart</item>
         <item name="iconPadding">@dimen/padding_icon</item>
         <item name="iconTint">@color/black_app</item>
+    </style>
+
+    <style name="TextView_settings">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingHorizontal">@dimen/padding_from_edges</item>
+        <item name="android:paddingVertical">@dimen/padding_view_settings</item>
+        <item name="android:textSize">@dimen/secondary_text_size</item>
+        <item name="android:textColor">@color/black_app</item>
     </style>
 </resources>
