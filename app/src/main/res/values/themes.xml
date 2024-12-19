@@ -6,4 +6,47 @@
     </style>
 
     <style name="Theme.PlaylistMaker" parent="Base.Theme.PlaylistMaker" />
+
+    <style name="Toolbar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">@dimen/height_toolbar</item>
+        <item name="android:layout_marginBottom">@dimen/margin_elements</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="titleTextColor">@color/black_app</item>
+        <item name="contentInsetStartWithNavigation">@dimen/padding_icon</item>
+        <item name="titleTextAppearance">@style/ToolbarTitleText</item>
+    </style>
+
+    <style name="ToolbarTitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">@dimen/primary_text_size</item>
+    </style>
+
+    <style name="Button_main">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginHorizontal">@dimen/padding_from_edges</item>
+        <item name="android:layout_marginBottom">@dimen/margin_button</item>
+        <item name="android:backgroundTint">@color/white</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:textColor">@color/black_app</item>
+        <item name="android:textSize">@dimen/primary_text_size</item>
+        <item name="cornerRadius">@dimen/button_radius</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">@dimen/padding_icon</item>
+        <item name="iconTint">@color/black_app</item>
+    </style>
+
+    <style name="TextView_settings">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingHorizontal">@dimen/padding_from_edges</item>
+        <item name="android:paddingVertical">@dimen/padding_view_settings</item>
+        <item name="android:textSize">@dimen/secondary_text_size</item>
+        <item name="android:textColor">@color/black_app</item>
+    </style>
 </resources>

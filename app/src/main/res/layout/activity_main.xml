@@ -1,19 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:background="@color/blue"
+    android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        style="@style/Toolbar"
+        app:title="@string/app_name"
+        app:titleTextColor="@color/white" />
+
+    <Button
+        android:id="@+id/button_search"
+        style="@style/Button_main"
+        android:text="@string/search"
+        app:icon="@drawable/search" />
+
+    <Button
+        android:id="@+id/button_library"
+        style="@style/Button_main"
+        android:text="@string/medialib"
+        app:icon="@drawable/library" />
+
+    <Button
+        android:id="@+id/button_settings"
+        style="@style/Button_main"
+        android:layout_marginBottom="@dimen/margin_elements"
+        android:text="@string/settings"
+        app:icon="@drawable/settings" />
+
+</LinearLayout>
