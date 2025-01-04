@@ -30,16 +30,19 @@
         app:trackTint="@color/switch_track_color"/>
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/button_share"
         style="@style/TextView_settings"
         android:drawableEnd="@drawable/share"
         android:text="@string/share_app" />
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/button_get_support"
         style="@style/TextView_settings"
         android:drawableEnd="@drawable/support"
         android:text="@string/get_support" />
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/button_user_agreement"
         style="@style/TextView_settings"
         android:drawableEnd="@drawable/right_arrow"
         android:text="@string/user_agreement"/>
