@@ -4,21 +4,21 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/blue"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="?attr/colorPrimary">
 
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         style="@style/Toolbar"
         app:title="@string/app_name"
-        app:titleTextColor="@color/white" />
+        app:titleTextColor="?attr/textColorPrimary" />
 
     <Button
         android:id="@+id/button_search"
         style="@style/Button_main"
         android:text="@string/search"
-        app:icon="@drawable/search" />
+        app:icon="@drawable/search"/>
 
     <Button
         android:id="@+id/button_library"
