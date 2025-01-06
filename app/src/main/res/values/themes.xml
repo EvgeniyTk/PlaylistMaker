@@ -16,8 +16,8 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="cursorColor">@color/blue</item>
+        <item name="editTextBackgroundColor">@color/edittext_background</item>
+        <item name="textColorSearch">@color/grey</item>
     </style>
-
-
-
 </resources>
