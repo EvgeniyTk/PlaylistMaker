@@ -19,5 +19,6 @@
         <item name="cursorColor">@color/blue</item>
         <item name="editTextBackgroundColor">@color/white</item>
         <item name="textColorSearch">@color/black_app</item>
+        <item name="clearButtonColor">@color/black_app</item>
     </style>
 </resources>

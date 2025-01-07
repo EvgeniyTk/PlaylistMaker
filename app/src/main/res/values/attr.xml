@@ -7,4 +7,5 @@
     <attr name="cursorColor" format="color"/>
     <attr name="textColorSearch" format="color"/>
     <attr name="editTextBackgroundColor" format="color"/>
+    <attr name="clearButtonColor" format="color"/>
 </resources>
