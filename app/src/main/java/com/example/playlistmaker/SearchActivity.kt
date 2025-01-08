@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
@@ -13,9 +12,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 
 
 class SearchActivity : AppCompatActivity() {
+    private lateinit var inputEditText: EditText
     private var text: String = TEXT_VALUE
 
     companion object {
@@ -28,13 +29,14 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_search)
+        inputEditText = findViewById(R.id.searchInputEditText)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.search)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        val inputEditText = findViewById<EditText>(R.id.searchInputEditText)
+
         val clearButton = findViewById<ImageView>(R.id.clear_button)
         val backButton = findViewById<Toolbar>(R.id.toolbar_search)
 
@@ -56,7 +58,7 @@ class SearchActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
-                clearButton.visibility = clearButtonVisibility(s)
+                clearButton.isVisible = !s.isNullOrEmpty()
 
             }
 
@@ -73,23 +75,15 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        Log.d("TextSave", "Текущий текст: ${text}") // проверка сохранения текста
+        Log.d("TextSave", "Текущий текст: $text") // проверка сохранения текста
         outState.putString(EDIT_TEXT_KEY, text)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         text = savedInstanceState.getString(EDIT_TEXT_KEY, TEXT_VALUE)
-        val searchText = findViewById<EditText>(R.id.searchInputEditText)
-        Log.d("TextSave", "Новый текст: ${text}") // проверка восстановления текста
-        searchText.setText(text)
+        Log.d("TextSave", "Новый текст: $text") // проверка восстановления текста
+        inputEditText.setText(text)
     }
 
-    private fun clearButtonVisibility(s: CharSequence?): Int {
-        return if (s.isNullOrEmpty()) {
-            View.GONE
-        } else {
-            View.VISIBLE
-        }
-    }
 }

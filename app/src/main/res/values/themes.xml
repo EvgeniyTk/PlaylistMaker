@@ -18,7 +18,7 @@
         <!-- Customize your theme here. -->
         <item name="cursorColor">@color/blue</item>
         <item name="editTextBackgroundColor">@color/edittext_background</item>
-        <item name="textColorSearch">@color/grey</item>
+        <item name="textColorSearchHint">@color/grey</item>
         <item name="clearButtonColor">@color/clear_button_color</item>
     </style>
 </resources>

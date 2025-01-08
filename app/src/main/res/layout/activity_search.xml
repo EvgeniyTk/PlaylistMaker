@@ -31,7 +31,7 @@
             android:drawableStart="@drawable/edittext_search"
             android:drawablePadding="@dimen/padding_icon"
             android:paddingEnd="@dimen/margin_elements"
-            android:drawableTint="?attr/textColorSearch"
+            android:drawableTint="?attr/textColorSearchHint"
             android:fontFamily="@font/ys_display_regular"
             android:hint="@string/search"
             android:importantForAutofill="no"
@@ -39,8 +39,8 @@
             android:maxLines="1"
             android:paddingHorizontal="@dimen/padding_editText_horizontal"
             android:paddingVertical="@dimen/padding_editText_vertical"
-            android:textColor="?attr/textColorSearch"
-            android:textColorHint="?attr/textColorSearch"
+            android:textColor="@color/black_app"
+            android:textColorHint="?attr/textColorSearchHint"
             android:textCursorDrawable="@drawable/search_cursor"
             android:textSize="@dimen/secondary_text_size" />
 
