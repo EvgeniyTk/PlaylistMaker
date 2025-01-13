@@ -4,39 +4,47 @@
     android:id="@+id/settings"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="?attr/colorSecondary">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         style="@style/Toolbar"
         app:navigationIcon="@drawable/back"
-        app:title="@string/settings" />
+        app:title="@string/settings"
+        app:titleTextAppearance="@style/ToolbarTitleText" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/ys_display_regular"
         android:gravity="center_vertical"
         android:paddingHorizontal="@dimen/padding_from_edges"
         android:paddingVertical="@dimen/padding_view_settings"
         android:text="@string/dark_theme"
+        android:textAllCaps="false"
+        android:textColor="?attr/textColorSecondary"
+        android:textFontWeight="400"
         android:textSize="@dimen/secondary_text_size"
         app:thumbTint="@color/switch_thumb_color"
-        app:trackTint="@color/switch_track_color" />
+        app:trackTint="@color/switch_track_color"/>
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/button_share"
         style="@style/TextView_settings"
         android:drawableEnd="@drawable/share"
         android:text="@string/share_app" />
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/button_get_support"
         style="@style/TextView_settings"
         android:drawableEnd="@drawable/support"
         android:text="@string/get_support" />
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/button_user_agreement"
         style="@style/TextView_settings"
         android:drawableEnd="@drawable/right_arrow"
-        android:text="@string/user_agreement" />
+        android:text="@string/user_agreement"/>
 
 </LinearLayout>

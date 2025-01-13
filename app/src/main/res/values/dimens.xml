@@ -6,6 +6,10 @@
     <dimen name="padding_icon">8dp</dimen>
     <dimen name="margin_button">16dp</dimen>
     <dimen name="padding_from_edges">16dp</dimen>
+    <dimen name="margin_editText_horizontal">16dp</dimen>
+    <dimen name="margin_editText_vertical">8dp</dimen>
+    <dimen name="padding_editText_horizontal">12dp</dimen>
+    <dimen name="padding_editText_vertical">8dp</dimen>
     <dimen name="margin_elements">24dp</dimen>
     <dimen name="height_toolbar">56dp</dimen>
     <dimen name="height_button">0dp</dimen>
