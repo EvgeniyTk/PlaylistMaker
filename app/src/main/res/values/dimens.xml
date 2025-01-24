@@ -2,8 +2,10 @@
 <resources>
     <dimen name="primary_text_size">22sp</dimen>
     <dimen name="secondary_text_size">16sp</dimen>
+    <dimen name="third_text_size">11sp</dimen>
     <dimen name="button_radius">16dp</dimen>
     <dimen name="padding_icon">8dp</dimen>
+    <dimen name="margin_track">8dp</dimen>
     <dimen name="margin_button">16dp</dimen>
     <dimen name="padding_from_edges">16dp</dimen>
     <dimen name="margin_editText_horizontal">16dp</dimen>
@@ -14,4 +16,5 @@
     <dimen name="height_toolbar">56dp</dimen>
     <dimen name="height_button">0dp</dimen>
     <dimen name="padding_view_settings">20dp</dimen>
+    <dimen name="size_track_image">44dp</dimen>
 </resources>

@@ -21,7 +21,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="@dimen/padding_from_edges"
-        android:layout_marginVertical="@dimen/margin_editText_vertical">
+        android:layout_marginTop="@dimen/margin_editText_vertical"
+        android:layout_marginBottom="@dimen/margin_editText_horizontal">
 
         <EditText
             android:id="@+id/searchInputEditText"
@@ -54,4 +55,9 @@
             android:src="@drawable/clear_search"
             android:visibility="gone" />
     </FrameLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/track_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 </LinearLayout>
