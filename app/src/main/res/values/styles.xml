@@ -47,4 +47,10 @@
         <item name="fontFamily">@font/ys_display_regular</item>
         <item name="android:textColor">?attr/textColorSecondary</item>
     </style>
+
+    <style name="TextView_track">
+        <item name="android:ellipsize">end</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:maxLines">1</item>
+    </style>
 </resources>
