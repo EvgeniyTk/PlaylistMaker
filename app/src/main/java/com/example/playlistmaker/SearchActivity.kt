@@ -23,7 +23,6 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.ArrayList
 
 
 class SearchActivity : AppCompatActivity() {
@@ -35,6 +34,11 @@ class SearchActivity : AppCompatActivity() {
         const val SEARCH_TEXT_VALUE = ""
         const val SEARCH_TEXT_KEY = "SEARCH TEXT"
     }
+    enum class CodeError {
+        GOOD,
+        NORESULT,
+        BADCONNECTION
+    }
 
     private val iTunesBaseUrl = "https://itunes.apple.com"
     private val retrofit = Retrofit.Builder()
@@ -42,7 +46,7 @@ class SearchActivity : AppCompatActivity() {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
     private val iTunesService = retrofit.create(ITunesApi::class.java)
-    private val trackList = ArrayList<Track>()
+    private val trackList: MutableList<Track> = mutableListOf()
     private lateinit var errorPage: LinearLayout
     private lateinit var errorImage: ImageView
     private lateinit var errorText: TextView
@@ -142,29 +146,31 @@ class SearchActivity : AppCompatActivity() {
                     response: Response<SearchResponse>
                 ) {
 
-                    if (response.code() == 200) {
-                        if (response.body()?.results.isNullOrEmpty()) {
-                            showPlaceholder(1)
+                    if (response.isSuccessful) {
+                        // я изначально сделал проверку кода 200 потому что в задании указано так,
+                        // цитирую: "В случае попадания запроса в метод onFailure() или отличии кода статуса запроса от 200, показывать эту заглушку"
+
+                        val responseTracks = response.body()?.results
+                        if (responseTracks.isNullOrEmpty()) {
+                            showPlaceholder(CodeError.NORESULT)
 
                         } else {
-                            showPlaceholder(0)
-                            response.body()?.results.let { adapter.updateData(it!!) }
+                            showPlaceholder(CodeError.GOOD)
+                            responseTracks.let { adapter.updateData(it) }
                         }
-                    } else {
-                        showPlaceholder(2)
                     }
                 }
 
                 override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
-                    showPlaceholder(2)
+                    showPlaceholder(CodeError.BADCONNECTION)
                 }
             })
     }
 
-    private fun showPlaceholder(code: Int) {
+    private fun showPlaceholder(code: CodeError) {
         when (code) {
-            0 -> errorPage.isVisible = false
-            1 -> {
+            CodeError.GOOD -> errorPage.isVisible = false
+            CodeError.NORESULT -> {
                 trackList.clear()
                 adapter.updateData(trackList)
                 errorPage.isVisible = true
@@ -173,7 +179,9 @@ class SearchActivity : AppCompatActivity() {
                 errorButton.isVisible = false
             }
 
-            2 -> {
+            CodeError.BADCONNECTION -> {
+                trackList.clear()
+                adapter.updateData(trackList)
                 errorPage.isVisible = true
                 errorImage.setImageResource(R.drawable.bad_connection)
                 errorText.text = getString(R.string.error_bad_connection)

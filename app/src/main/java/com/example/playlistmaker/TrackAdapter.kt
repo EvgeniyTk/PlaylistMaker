@@ -6,8 +6,8 @@ import androidx.recyclerview.widget.RecyclerView
 class TrackAdapter(
 ) : RecyclerView.Adapter<TrackViewHolder> () {
 
-    private var trackList = ArrayList<Track>()
-    fun updateData(newTrackList: ArrayList<Track>){
+    private var trackList: MutableList<Track> = mutableListOf()
+    fun updateData(newTrackList: MutableList<Track>){
         trackList = newTrackList
         notifyDataSetChanged()
 
