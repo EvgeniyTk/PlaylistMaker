@@ -37,7 +37,7 @@ class SearchHistory(private var sharedPref: SharedPreferences) {
             .apply()
     }
 
-    fun saveTrackHistory() {
+    private fun saveTrackHistory() {
         val str = gson.toJson(trackList)
         sharedPref.edit()
             .putString(HISTORY_LIST, str)

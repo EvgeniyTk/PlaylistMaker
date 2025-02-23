@@ -21,7 +21,6 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.App.Companion.PLAYLISTMAKER_PREF
-import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -235,7 +234,7 @@ class SearchActivity : AppCompatActivity() {
         } else {
             searchHistoryHeader.visibility = View.GONE
             searchHistoryClearButton.visibility = View.GONE
-            historyAdapter.updateData(mutableListOf<Track>())
+            historyAdapter.updateData(mutableListOf())
             recycler.adapter = searchAdapter
         }
     }
