@@ -1,8 +1,10 @@
 package com.example.playlistmaker
 
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -18,6 +20,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlistmaker.App.Companion.PLAYLISTMAKER_PREF
+import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,7 +31,12 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class SearchActivity : AppCompatActivity() {
     private lateinit var inputEditText: EditText
-    private lateinit var adapter: TrackAdapter
+    private lateinit var searchAdapter: TrackAdapter
+    private lateinit var historyAdapter: TrackAdapter
+    private lateinit var searchHistory: SearchHistory
+    private lateinit var sharedPref: SharedPreferences
+    private lateinit var recycler: RecyclerView
+
     private var searchTextValue: String = SEARCH_TEXT_VALUE
 
     companion object {
@@ -51,6 +60,9 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var errorImage: ImageView
     private lateinit var errorText: TextView
     private lateinit var errorButton: Button
+    private lateinit var searchHistoryHeader: TextView
+    private lateinit var searchHistoryClearButton: Button
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,15 +79,21 @@ class SearchActivity : AppCompatActivity() {
 
         val clearButton = findViewById<ImageView>(R.id.clear_button)
         val backButton = findViewById<Toolbar>(R.id.toolbar_search)
-        val recycler = findViewById<RecyclerView>(R.id.track_list)
+        recycler = findViewById(R.id.track_list)
         errorPage = findViewById(R.id.placeholder_error)
         errorImage = findViewById(R.id.error_image)
         errorText = findViewById(R.id.error_tv)
         errorButton = findViewById(R.id.error_button)
+        sharedPref = getSharedPreferences(PLAYLISTMAKER_PREF, MODE_PRIVATE)
+        searchHistory = SearchHistory(sharedPref)
+        searchHistory.getSavedHistory()
+        searchHistoryClearButton = findViewById(R.id.clear_history_button)
+        searchHistoryHeader = findViewById(R.id.search_history_header)
 
         recycler.layoutManager = LinearLayoutManager(this)
-        adapter = TrackAdapter()
-        recycler.adapter = adapter
+        searchAdapter = TrackAdapter { setTrack(it) }
+        historyAdapter = TrackAdapter { setTrack(it) }
+        recycler.adapter = searchAdapter
 
         backButton.setNavigationOnClickListener {
             finish()
@@ -89,6 +107,20 @@ class SearchActivity : AppCompatActivity() {
             false
         }
 
+        searchHistoryClearButton.setOnClickListener {
+            searchHistory.clearTrackHistory()
+            historyAdapter.updateData(searchHistory.getHistoryTracks())
+            inputEditText.clearFocus()
+        }
+
+        inputEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus && searchHistory.getHistoryTracks().isNotEmpty()) {
+                setHistoryVisibility(true)
+            } else {
+                setHistoryVisibility(false)
+            }
+        }
+
         clearButton.setOnClickListener {
             inputEditText.setText("")
             val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
@@ -96,7 +128,7 @@ class SearchActivity : AppCompatActivity() {
             inputEditText.clearFocus()
             errorPage.isVisible = false
             trackList.clear()
-            adapter.updateData(trackList)
+            searchAdapter.updateData(trackList)
         }
 
         errorButton.setOnClickListener {
@@ -110,6 +142,7 @@ class SearchActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 clearButton.isVisible = !s.isNullOrEmpty()
+                setHistoryVisibility(inputEditText.hasFocus() && s?.isEmpty() == true)
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -147,16 +180,13 @@ class SearchActivity : AppCompatActivity() {
                 ) {
 
                     if (response.isSuccessful) {
-                        // я изначально сделал проверку кода 200 потому что в задании указано так,
-                        // цитирую: "В случае попадания запроса в метод onFailure() или отличии кода статуса запроса от 200, показывать эту заглушку"
-
                         val responseTracks = response.body()?.results
                         if (responseTracks.isNullOrEmpty()) {
                             showPlaceholder(CodeError.NORESULT)
 
                         } else {
                             showPlaceholder(CodeError.GOOD)
-                            responseTracks.let { adapter.updateData(it) }
+                            responseTracks.let { searchAdapter.updateData(it) }
                         }
                     }
                 }
@@ -172,7 +202,7 @@ class SearchActivity : AppCompatActivity() {
             CodeError.GOOD -> errorPage.isVisible = false
             CodeError.NORESULT -> {
                 trackList.clear()
-                adapter.updateData(trackList)
+                searchAdapter.updateData(trackList)
                 errorPage.isVisible = true
                 errorImage.setImageResource(R.drawable.no_result)
                 errorText.text = getString(R.string.error_result_search)
@@ -181,7 +211,7 @@ class SearchActivity : AppCompatActivity() {
 
             CodeError.BADCONNECTION -> {
                 trackList.clear()
-                adapter.updateData(trackList)
+                searchAdapter.updateData(trackList)
                 errorPage.isVisible = true
                 errorImage.setImageResource(R.drawable.bad_connection)
                 errorText.text = getString(R.string.error_bad_connection)
@@ -190,4 +220,25 @@ class SearchActivity : AppCompatActivity() {
 
         }
     }
+
+    private fun setTrack(track: Track) {
+        searchHistory.addTrackToHistory(track)
+
+    }
+
+    private fun setHistoryVisibility(isSearchFieldEmpty: Boolean) {
+        if (isSearchFieldEmpty) {
+            searchHistoryHeader.visibility = View.VISIBLE
+            searchHistoryClearButton.visibility = View.VISIBLE
+            historyAdapter.updateData(searchHistory.getHistoryTracks())
+            recycler.adapter = historyAdapter
+        } else {
+            searchHistoryHeader.visibility = View.GONE
+            searchHistoryClearButton.visibility = View.GONE
+            historyAdapter.updateData(mutableListOf<Track>())
+            recycler.adapter = searchAdapter
+        }
+    }
+
+
 }

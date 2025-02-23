@@ -2,6 +2,7 @@
 <resources>
     <dimen name="primary_text_size">22sp</dimen>
     <dimen name="secondary_text_size">16sp</dimen>
+    <dimen name="placeholder_text_size">19sp</dimen>
     <dimen name="third_text_size">11sp</dimen>
     <dimen name="button_radius">16dp</dimen>
     <dimen name="padding_icon">8dp</dimen>

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
+    android:foreground="?attr/selectableItemBackground"
     android:paddingHorizontal="@dimen/padding_editText_horizontal"
     android:paddingVertical="@dimen/padding_editText_vertical">
 
