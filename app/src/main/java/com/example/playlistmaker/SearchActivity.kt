@@ -3,10 +3,13 @@ package com.example.playlistmaker
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -15,16 +18,39 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 
 class SearchActivity : AppCompatActivity() {
     private lateinit var inputEditText: EditText
-    private var text: String = TEXT_VALUE
+    private lateinit var adapter: TrackAdapter
+    private var searchTextValue: String = SEARCH_TEXT_VALUE
 
     companion object {
-        const val EDIT_TEXT_KEY = "KEY"
-        const val TEXT_VALUE = ""
+        const val SEARCH_TEXT_VALUE = ""
+        const val SEARCH_TEXT_KEY = "SEARCH TEXT"
     }
+    enum class CodeError {
+        GOOD,
+        NORESULT,
+        BADCONNECTION
+    }
+
+    private val iTunesBaseUrl = "https://itunes.apple.com"
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(iTunesBaseUrl)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+    private val iTunesService = retrofit.create(ITunesApi::class.java)
+    private val trackList: MutableList<Track> = mutableListOf()
+    private lateinit var errorPage: LinearLayout
+    private lateinit var errorImage: ImageView
+    private lateinit var errorText: TextView
+    private lateinit var errorButton: Button
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,11 +67,26 @@ class SearchActivity : AppCompatActivity() {
 
         val clearButton = findViewById<ImageView>(R.id.clear_button)
         val backButton = findViewById<Toolbar>(R.id.toolbar_search)
+        val recycler = findViewById<RecyclerView>(R.id.track_list)
+        errorPage = findViewById(R.id.placeholder_error)
+        errorImage = findViewById(R.id.error_image)
+        errorText = findViewById(R.id.error_tv)
+        errorButton = findViewById(R.id.error_button)
 
-
+        recycler.layoutManager = LinearLayoutManager(this)
+        adapter = TrackAdapter()
+        recycler.adapter = adapter
 
         backButton.setNavigationOnClickListener {
             finish()
+        }
+
+        inputEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                search()
+                true
+            }
+            false
         }
 
         clearButton.setOnClickListener {
@@ -53,6 +94,13 @@ class SearchActivity : AppCompatActivity() {
             val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
             inputEditText.clearFocus()
+            errorPage.isVisible = false
+            trackList.clear()
+            adapter.updateData(trackList)
+        }
+
+        errorButton.setOnClickListener {
+            search()
         }
 
         val simpleTextWatcher = object : TextWatcher {
@@ -61,75 +109,85 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
                 clearButton.isVisible = !s.isNullOrEmpty()
-
             }
 
             override fun afterTextChanged(s: Editable?) {
                 // empty
-                text = s.toString()
+                searchTextValue = s.toString()
 
             }
         }
         inputEditText.addTextChangedListener(simpleTextWatcher)
-
-
-        val recycler = findViewById<RecyclerView>(R.id.track_list)
-
-        val tracks = listOf(
-            Track(
-                "Smells Like Teen Spirit",
-                "Nirvana",
-                "5:01",
-                "https://is5-ssl.mzstatic.com/image/thumb/Music115/v4/7b/58/c2/7b58c21a-2b51-2bb2-e59a-9bb9b96ad8c3/00602567924166.rgb.jpg/100x100bb.jpg"
-            ),
-            Track(
-                "Billie Jean",
-                "Michael Jackson",
-                "4:35",
-                "https://is5-ssl.mzstatic.com/image/thumb/Music125/v4/3d/9d/38/3d9d3811-71f0-3a0e-1ada-3004e56ff852/827969428726.jpg/100x100bb.jpg"
-            ),
-            Track(
-                "Stayin' Alive",
-                "Bee Gees",
-                "4:10",
-                "https://is4-ssl.mzstatic.com/image/thumb/Music115/v4/1f/80/1f/1f801fc1-8c0f-ea3e-d3e5-387c6619619e/16UMGIM86640.rgb.jpg/100x100bb.jpg"
-            ),
-            Track(
-                "Whole Lotta Love",
-                "Led Zeppelin",
-                "5:33",
-                "https://is2-ssl.mzstatic.com/image/thumb/Music62/v4/7e/17/e3/7e17e33f-2efa-2a36-e916-7f808576cf6b/mzm.fyigqcbs.jpg/100x100bb.jpg"
-            ),
-            Track(
-                "Sweet Child O'Mine",
-                "Guns N' Roses",
-                "5:03",
-                "https://is5-ssl.mzstatic.com/image/thumb/Music125/v4/a0/4d/c4/a04dc484-03cc-02aa-fa82-5334fcb4bc16/18UMGIM24878.rgb.jpg/100x100bb.jpg"
-            ),
-        )
-
-        recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = TrackAdapter(tracks)
 
     }
 
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        Log.d("TextSave", "Текущий текст: $text") // проверка сохранения текста
-        outState.putString(EDIT_TEXT_KEY, text)
+        outState.putString(SEARCH_TEXT_KEY, searchTextValue)
+
+
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        text = savedInstanceState.getString(EDIT_TEXT_KEY, TEXT_VALUE)
-        Log.d("TextSave", "Новый текст: $text") // проверка восстановления текста
-        inputEditText.setText(text)
+        searchTextValue = savedInstanceState.getString(SEARCH_TEXT_KEY, SEARCH_TEXT_VALUE)
+        inputEditText.setText(searchTextValue)
+
+
     }
 
+    private fun search() {
+        iTunesService.search(inputEditText.text.toString())
+            .enqueue(object : Callback<SearchResponse> {
+                override fun onResponse(
+                    call: Call<SearchResponse>,
+                    response: Response<SearchResponse>
+                ) {
 
+                    if (response.isSuccessful) {
+                        // я изначально сделал проверку кода 200 потому что в задании указано так,
+                        // цитирую: "В случае попадания запроса в метод onFailure() или отличии кода статуса запроса от 200, показывать эту заглушку"
 
+                        val responseTracks = response.body()?.results
+                        if (responseTracks.isNullOrEmpty()) {
+                            showPlaceholder(CodeError.NORESULT)
 
+                        } else {
+                            showPlaceholder(CodeError.GOOD)
+                            responseTracks.let { adapter.updateData(it) }
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
+                    showPlaceholder(CodeError.BADCONNECTION)
+                }
+            })
+    }
+
+    private fun showPlaceholder(code: CodeError) {
+        when (code) {
+            CodeError.GOOD -> errorPage.isVisible = false
+            CodeError.NORESULT -> {
+                trackList.clear()
+                adapter.updateData(trackList)
+                errorPage.isVisible = true
+                errorImage.setImageResource(R.drawable.no_result)
+                errorText.text = getString(R.string.error_result_search)
+                errorButton.isVisible = false
+            }
+
+            CodeError.BADCONNECTION -> {
+                trackList.clear()
+                adapter.updateData(trackList)
+                errorPage.isVisible = true
+                errorImage.setImageResource(R.drawable.bad_connection)
+                errorText.text = getString(R.string.error_bad_connection)
+                errorButton.isVisible = true
+            }
+
+        }
+    }
 }
