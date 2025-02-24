@@ -20,8 +20,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_editText_vertical"
-        android:layout_marginBottom="@dimen/margin_editText_horizontal"
+        android:layout_marginVertical="@dimen/margin_editText_vertical"
         android:paddingHorizontal="@dimen/padding_from_edges">
 
         <EditText
@@ -58,48 +57,80 @@
             android:visibility="gone" />
     </FrameLayout>
 
-    <FrameLayout
+    <LinearLayout
+        android:id="@+id/placeholder_error"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingVertical="100dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/error_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingVertical="@dimen/padding_from_edges" />
+
+        <TextView
+            android:id="@+id/error_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/margin_elements"
+            android:fontFamily="@font/ys_display_medium"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/margin_elements"
+            android:textColor="?attr/textColorSecondary"
+            android:textSize="@dimen/placeholder_text_size" />
+
+        <Button
+            android:id="@+id/error_button"
+            style="@style/Button_placeholder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/update" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/search_history_header"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginHorizontal="@dimen/padding_from_edges"
+            android:fontFamily="@font/ys_display_medium"
+            android:textAlignment="center"
+            android:textColor="?attr/textColorSecondary"
+            android:textFontWeight="400"
+            android:textSize="@dimen/placeholder_text_size"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="@dimen/margin_editText_vertical"
+            android:paddingTop="18dp"
+            android:paddingBottom="@dimen/padding_editText_vertical"
+            android:text="@string/search_history_header"
+            android:visibility="gone"/>
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/track_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <LinearLayout
-            android:id="@+id/placeholder_error"
-            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="@dimen/margin_track"/>
+        <Button
+            android:id="@+id/clear_history_button"
+            style="@style/Button_placeholder"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingVertical="100dp"
-            android:visibility="gone">
+            android:layout_marginTop="@dimen/margin_elements"
+            android:text="@string/clear_history_button"
+            app:cornerRadius="54dp"
+            android:visibility="gone"/>
+    </LinearLayout>
 
-            <ImageView
-                android:id="@+id/error_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:paddingVertical="@dimen/padding_from_edges" />
-
-            <TextView
-                android:id="@+id/error_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginBottom="@dimen/margin_elements"
-                android:fontFamily="@font/ys_display_medium"
-                android:gravity="center"
-                android:paddingHorizontal="@dimen/margin_elements"
-                android:textColor="?attr/textColorSecondary"
-                android:textSize="19sp" />
-
-            <Button
-                android:id="@+id/error_button"
-                style="@style/Button_update"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/update" />
-        </LinearLayout>
-    </FrameLayout>
 </LinearLayout>
