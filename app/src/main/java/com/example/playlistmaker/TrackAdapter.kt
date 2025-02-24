@@ -21,6 +21,7 @@ class TrackAdapter(
         holder.bind(trackList[position])
         holder.itemView.setOnClickListener{
             onItemClickListener(trackList[position])
+            notifyDataSetChanged()
         }
     }
 

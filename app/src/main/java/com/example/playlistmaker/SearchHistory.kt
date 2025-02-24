@@ -28,6 +28,7 @@ class SearchHistory(private var sharedPref: SharedPreferences) {
             trackList.removeAt(trackList.lastIndex)
         trackList.add(0, track)
         saveTrackHistory()
+
     }
 
     fun clearTrackHistory() {

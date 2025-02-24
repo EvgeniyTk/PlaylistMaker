@@ -91,7 +91,9 @@ class SearchActivity : AppCompatActivity() {
 
         recycler.layoutManager = LinearLayoutManager(this)
         searchAdapter = TrackAdapter { setTrack(it) }
-        historyAdapter = TrackAdapter { setTrack(it) }
+        historyAdapter = TrackAdapter {
+            setTrack(it)
+        }
         recycler.adapter = searchAdapter
 
         backButton.setNavigationOnClickListener {
@@ -182,10 +184,14 @@ class SearchActivity : AppCompatActivity() {
                         val responseTracks = response.body()?.results
                         if (responseTracks.isNullOrEmpty()) {
                             showPlaceholder(CodeError.NORESULT)
+                            searchHistoryHeader.visibility = View.GONE
+                            searchHistoryClearButton.visibility = View.GONE
+                            recycler.visibility = View.GONE
 
                         } else {
                             showPlaceholder(CodeError.GOOD)
                             responseTracks.let { searchAdapter.updateData(it) }
+                            recycler.visibility = View.VISIBLE
                         }
                     }
                 }
@@ -222,6 +228,7 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setTrack(track: Track) {
         searchHistory.addTrackToHistory(track)
+
 
     }
 
