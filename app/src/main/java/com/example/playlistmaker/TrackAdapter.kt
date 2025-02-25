@@ -4,6 +4,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 class TrackAdapter(
+    private val onItemClickListener:   (Track) -> Unit
 ) : RecyclerView.Adapter<TrackViewHolder> () {
 
     private var trackList: MutableList<Track> = mutableListOf()
@@ -18,10 +19,12 @@ class TrackAdapter(
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         holder.bind(trackList[position])
+        holder.itemView.setOnClickListener{
+            onItemClickListener(trackList[position])
+            notifyDataSetChanged()
+        }
     }
 
     override fun getItemCount() = trackList.size
-
-
 
 }
