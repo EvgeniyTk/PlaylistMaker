@@ -1,5 +1,6 @@
 package com.example.playlistmaker
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
@@ -21,6 +22,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.App.Companion.PLAYLISTMAKER_PREF
+import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -227,9 +229,11 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun setTrack(track: Track) {
+        val json = Gson().toJson(track)
+        val trackIntent = Intent(this, PlayerActivity::class.java)
+        trackIntent.putExtra("TRACK", json)
+        startActivity(trackIntent)
         searchHistory.addTrackToHistory(track)
-
-
     }
 
     private fun setHistoryVisibility(isSearchFieldEmpty: Boolean) {
