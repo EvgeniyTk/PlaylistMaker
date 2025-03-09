@@ -15,8 +15,12 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         sharedPrefs = getSharedPreferences(PLAYLISTMAKER_PREF, MODE_PRIVATE)
-        darkTheme = sharedPrefs.getBoolean(NIGHT_MODE, false)
-        switchTheme(darkTheme)
+        if (!sharedPrefs.contains(NIGHT_MODE)) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        } else {
+            darkTheme = sharedPrefs.getBoolean(NIGHT_MODE, false)
+            switchTheme(darkTheme)
+        }
 
     }
 
@@ -28,6 +32,7 @@ class App : Application() {
             } else {
                 AppCompatDelegate.MODE_NIGHT_NO
             }
+
         )
         sharedPrefs.edit()
             .putBoolean(NIGHT_MODE, darkTheme)

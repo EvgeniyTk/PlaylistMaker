@@ -2,11 +2,11 @@ package com.example.playlistmaker
 
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.Group
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class PlayerActivity : AppCompatActivity() {
-    private lateinit var backButton: ImageButton
+    private lateinit var toolbar: Toolbar
     private lateinit var trackImage: ImageView
     private lateinit var trackName: TextView
     private lateinit var artistName: TextView
@@ -42,7 +42,7 @@ class PlayerActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        backButton = findViewById(R.id.back_button)
+        toolbar  = findViewById(R.id.toolbar_player)
         trackImage = findViewById(R.id.track_image)
         trackName = findViewById(R.id.track_name)
         artistName = findViewById(R.id.artist_name)
@@ -55,7 +55,7 @@ class PlayerActivity : AppCompatActivity() {
         constraintGroup = findViewById(R.id.info_group)
 
 
-        backButton.setOnClickListener {
+        toolbar.setNavigationOnClickListener {
             finish()
         }
 

@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?attr/colorSecondary">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
@@ -11,18 +12,13 @@
         android:layout_height="wrap_content"
         tools:context=".PlayerActivity">
 
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="4dp"
-            android:background="@null"
-            android:foreground="?attr/selectableItemBackground"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_player"
+            style="@style/Toolbar"
+            app:navigationIcon="@drawable/back"
+            app:titleTextAppearance="@style/ToolbarTitleText"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/back"
-            app:titleTextAppearance="@style/ToolbarTitleText" />
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/leftBorder"
@@ -51,7 +47,7 @@
             app:layout_constraintDimensionRatio="h,1:1"
             app:layout_constraintEnd_toEndOf="@id/rightBorder"
             app:layout_constraintStart_toStartOf="@id/leftBorder"
-            app:layout_constraintTop_toBottomOf="@+id/back_button" />
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_player" />
 
         <TextView
             android:id="@+id/track_name"
