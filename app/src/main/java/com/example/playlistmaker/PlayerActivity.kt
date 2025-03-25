@@ -1,6 +1,7 @@
 package com.example.playlistmaker
 
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -17,10 +18,8 @@ import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.Locale
-import java.util.Objects
 
 class PlayerActivity : AppCompatActivity() {
     companion object {
@@ -38,11 +37,7 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var trackImage: ImageView
     private lateinit var trackName: TextView
     private lateinit var artistName: TextView
-
-    //    private lateinit var playlistButton: ImageButton
     private lateinit var playButton: ImageButton
-
-    //    private lateinit var favouritesButton: ImageButton
     private lateinit var playTime: TextView
     private lateinit var trackDuration: TextView
     private lateinit var collection: TextView
@@ -52,6 +47,7 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var constraintGroup: Group
     private lateinit var url: String
     private var handler: Handler? = null
+    private val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,31 +79,38 @@ class PlayerActivity : AppCompatActivity() {
             finish()
         }
 
-        val json = intent.getStringExtra("TRACK")
-
-        val track: Track = Gson().fromJson(json, Track::class.java)
-
-        Glide.with(applicationContext)
-            .load(track.getCoverArtwork())
-            .transform(CenterCrop(), RoundedCorners(16))
-            .placeholder(R.drawable.track_placeholder)
-            .into(trackImage)
-
-        trackName.text = track.trackName
-        artistName.text = track.artistName
-        trackDuration.text =
-            SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis).toString()
-        if (track.collectionName.isEmpty()) {
-            constraintGroup.visibility = View.GONE
+        val track: Track? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(TRACK, Track::class.java)
         } else {
-            collection.text = track.collectionName
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra(TRACK)
         }
-        releaseDate.text = track.releaseDate.substring(0, 4)
-        genre.text = track.primaryGenreName
-        country.text = track.country
 
-        url = track.previewUrl
-        preparePlayer()
+        if (track != null) {
+            Glide.with(applicationContext)
+                .load(track.getCoverArtwork())
+                .transform(CenterCrop(), RoundedCorners(16))
+                .placeholder(R.drawable.track_placeholder)
+                .into(trackImage)
+
+            trackName.text = track.trackName
+            artistName.text = track.artistName
+            trackDuration.text =
+                SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis).toString()
+            if (track.collectionName.isEmpty()) {
+                constraintGroup.visibility = View.GONE
+            } else {
+                collection.text = track.collectionName
+            }
+            releaseDate.text = track.releaseDate.substring(0, 4)
+            genre.text = track.primaryGenreName
+            country.text = track.country
+
+            url = track.previewUrl
+            preparePlayer()
+        }
+
+
 
         playButton.setOnClickListener {
             playbackControl()
@@ -132,13 +135,13 @@ class PlayerActivity : AppCompatActivity() {
         mediaPlayer.setOnPreparedListener {
             playButton.isEnabled = true
             playerState = STATE_PREPARED
-            playTime.text = "00:00"
+            playTime.text = dateFormat.format(0)
         }
         mediaPlayer.setOnCompletionListener {
             playButton.setImageResource(R.drawable.play_button)
             playerState = STATE_PREPARED
             handler?.removeCallbacks(updateRunnable)
-            playTime.text = "00:00"
+            playTime.text = dateFormat.format(0)
         }
     }
 
@@ -174,7 +177,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private val updateRunnable =  object : Runnable {
             override fun run() {
-                playTime.text = SimpleDateFormat("mm:ss",Locale.getDefault()).format(mediaPlayer.currentPosition)
+                playTime.text = dateFormat.format(mediaPlayer.currentPosition)
                 handler?.postDelayed(this, DELAY)
 
             }

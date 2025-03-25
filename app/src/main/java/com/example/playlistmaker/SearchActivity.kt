@@ -8,7 +8,6 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
@@ -25,13 +24,13 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.App.Companion.PLAYLISTMAKER_PREF
-import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+const val TRACK = "TRACK"
 
 class SearchActivity : AppCompatActivity() {
     private lateinit var inputEditText: EditText
@@ -43,6 +42,8 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
 
     private var searchTextValue: String = SEARCH_TEXT_VALUE
+
+
 
     companion object {
         const val SEARCH_TEXT_VALUE = ""
@@ -71,7 +72,6 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var searchHistoryHeader: TextView
     private lateinit var searchHistoryClearButton: Button
     private val handler = Handler(Looper.getMainLooper())
-
     private val searchRunnable = Runnable { search() }
 
     private fun searchDebounce() {
@@ -90,6 +90,11 @@ class SearchActivity : AppCompatActivity() {
             handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
         }
         return current
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(searchRunnable)
     }
 
 
@@ -124,17 +129,11 @@ class SearchActivity : AppCompatActivity() {
         historyAdapter = TrackAdapter { setTrack(it) }
         recycler.adapter = searchAdapter
 
+
         backButton.setNavigationOnClickListener {
             finish()
         }
 
-//        inputEditText.setOnEditorActionListener { _, actionId, _ ->
-//            if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                search()
-//                true
-//            }
-//            false
-//        }
 
         searchHistoryClearButton.setOnClickListener {
             searchHistory.clearTrackHistory()
@@ -176,17 +175,17 @@ class SearchActivity : AppCompatActivity() {
                     showPlaceholder(CodeError.GOOD)
                 }
                 setHistoryVisibility(inputEditText.hasFocus() && s?.isEmpty() == true)
+                recycler.visibility = View.VISIBLE
                 searchDebounce()
             }
 
             override fun afterTextChanged(s: Editable?) {
-
                 searchTextValue = s.toString()
 
             }
         }
         inputEditText.addTextChangedListener(simpleTextWatcher)
-//        inputEditText.requestFocus() // Фокус на editText при переходе на активити
+
 
     }
 
@@ -210,6 +209,8 @@ class SearchActivity : AppCompatActivity() {
         if (inputEditText.text.isNotEmpty()) {
 
             progressBar.visibility = View.VISIBLE
+            setHistoryVisibility(false)
+            showPlaceholder(CodeError.GOOD)
 
             iTunesService.search(inputEditText.text.toString())
                 .enqueue(object : Callback<SearchResponse> {
@@ -222,9 +223,6 @@ class SearchActivity : AppCompatActivity() {
                             val responseTracks = response.body()?.results
                             if (responseTracks.isNullOrEmpty()) {
                                 showPlaceholder(CodeError.NORESULT)
-                                searchHistoryHeader.visibility = View.GONE
-                                searchHistoryClearButton.visibility = View.GONE
-                                recycler.visibility = View.GONE
 
                             } else {
                                 showPlaceholder(CodeError.GOOD)
@@ -246,8 +244,6 @@ class SearchActivity : AppCompatActivity() {
         when (code) {
             CodeError.GOOD -> errorPage.isVisible = false
             CodeError.NORESULT -> {
-                trackList.clear()
-                searchAdapter.updateData(trackList)
                 errorPage.isVisible = true
                 errorImage.setImageResource(R.drawable.no_result)
                 errorText.text = getString(R.string.error_result_search)
@@ -255,8 +251,6 @@ class SearchActivity : AppCompatActivity() {
             }
 
             CodeError.BADCONNECTION -> {
-                trackList.clear()
-                searchAdapter.updateData(trackList)
                 errorPage.isVisible = true
                 errorImage.setImageResource(R.drawable.bad_connection)
                 errorText.text = getString(R.string.error_bad_connection)
@@ -268,9 +262,8 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setTrack(track: Track) {
         if (clickDebounce()) {
-            val json = Gson().toJson(track)
             val trackIntent = Intent(this, PlayerActivity::class.java)
-            trackIntent.putExtra("TRACK", json)
+            trackIntent.putExtra(TRACK , track)
             startActivity(trackIntent)
             searchHistory.addTrackToHistory(track)
         }
@@ -280,14 +273,16 @@ class SearchActivity : AppCompatActivity() {
         if (isSearchFieldEmpty) {
             searchHistoryHeader.visibility = View.VISIBLE
             searchHistoryClearButton.visibility = View.VISIBLE
-            recycler.visibility = View.VISIBLE
             historyAdapter.updateData(searchHistory.getHistoryTracks())
+            trackList.clear()
+            searchAdapter.updateData(trackList)
             recycler.adapter = historyAdapter
+            recycler.visibility = View.VISIBLE
         } else {
             searchHistoryHeader.visibility = View.GONE
             searchHistoryClearButton.visibility = View.GONE
-            historyAdapter.updateData(mutableListOf())
             recycler.adapter = searchAdapter
+            recycler.visibility = View.GONE
         }
     }
 
