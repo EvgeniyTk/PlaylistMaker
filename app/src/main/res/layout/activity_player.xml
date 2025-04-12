@@ -96,11 +96,12 @@
             app:layout_constraintStart_toStartOf="@id/leftBorder"
             app:layout_constraintTop_toTopOf="@+id/play_button" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/play_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
+            android:background="@null"
             android:src="@drawable/play_button"
             app:layout_constraintEnd_toStartOf="@id/favourites_button"
             app:layout_constraintStart_toEndOf="@id/playlist_button"
@@ -119,7 +120,7 @@
 
         <TextView
             android:id="@+id/time_play"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:fontFamily="@font/ys_display_medium"

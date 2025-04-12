@@ -18,7 +18,7 @@
     <string name="clear_history_button">Очистить историю</string>
     <string name="search_history_header">Вы искали</string>
     <string name="releaseDate">Год</string>
-    <string name="placeholder_track_time">0:30</string>
+    <string name="placeholder_track_time">00:00</string>
     <string name="song_duration">Длительность</string>
     <string name="collection">Альбом</string>
     <string name="genre_name">Жанр</string>
