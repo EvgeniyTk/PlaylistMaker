@@ -36,7 +36,7 @@ class SettingsActivity : AppCompatActivity() {
         getSettingsInteractor = Creator.provideSettingsInteractor(this)
 
         getSettingsInteractor.darkThemeIsEnabled(
-            object : SettingsInteractor.DarkThemeConsumer{
+            object : SettingsInteractor.DarkThemeConsumer {
                 override fun consume(darkThemeIsEnabled: Boolean) {
                     themeSwitcher.isChecked = darkThemeIsEnabled
                 }
@@ -54,7 +54,7 @@ class SettingsActivity : AppCompatActivity() {
             finish()
         }
 
-        share.setOnClickListener{
+        share.setOnClickListener {
             val message = getString(R.string.course_link)
             val shareIntent = Intent(Intent.ACTION_SEND)
             shareIntent.setType("text/plain")
@@ -62,7 +62,7 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(Intent.createChooser(shareIntent, null))
         }
 
-        getSupport.setOnClickListener{
+        getSupport.setOnClickListener {
             val email = getString(R.string.email)
             val subject = getString(R.string.email_theme)
             val body = getString(R.string.email_body)
@@ -74,7 +74,7 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(emailIntent)
         }
 
-        userAgreement.setOnClickListener{
+        userAgreement.setOnClickListener {
             val link = getString(R.string.practicum_offer)
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
             startActivity(browserIntent)

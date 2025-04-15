@@ -7,6 +7,7 @@ import com.example.playlistmaker.App.Companion.PLAYLISTMAKER_PREF
 import com.example.playlistmaker.data.SearchHistoryRepositoryImpl
 import com.example.playlistmaker.data.SettingsRepositoryImpl
 import com.example.playlistmaker.data.TracksRepositoryImpl
+import com.example.playlistmaker.data.network.ITunesApi
 import com.example.playlistmaker.data.network.RetrofitNetworkClient
 import com.example.playlistmaker.domain.api.SearchHistoryInteractor
 import com.example.playlistmaker.domain.api.SearchHistoryRepository
@@ -17,8 +18,12 @@ import com.example.playlistmaker.domain.api.TracksRepository
 import com.example.playlistmaker.domain.impl.SearchHistoryInteractorImpl
 import com.example.playlistmaker.domain.impl.SettingsInteractorImpl
 import com.example.playlistmaker.domain.impl.TracksInteractorImpl
+import com.google.gson.Gson
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 object Creator {
+    private val gson by lazy { Gson() }
 
     private lateinit var application: Application
 
@@ -26,17 +31,26 @@ object Creator {
         this.application = application
     }
 
+    private fun provideITunesService(): ITunesApi {
+        val iTunesBaseUrl = "https://itunes.apple.com"
+        val retrofit = Retrofit.Builder()
+            .baseUrl(iTunesBaseUrl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        return retrofit.create(ITunesApi::class.java)
+    }
+
     private fun getTrackRepository(): TracksRepository {
-        return TracksRepositoryImpl(RetrofitNetworkClient())
+        return TracksRepositoryImpl(RetrofitNetworkClient(provideITunesService()))
     }
 
 
     private fun getSearchHistoryRepository(): SearchHistoryRepository {
-        return SearchHistoryRepositoryImpl()
+        return SearchHistoryRepositoryImpl(provideSharedPreferences(), gson)
     }
 
     private fun getSettingsRepository(context: Context): SettingsRepository {
-        return SettingsRepositoryImpl(context)
+        return SettingsRepositoryImpl(provideSharedPreferences(), context.resources)
     }
 
 
