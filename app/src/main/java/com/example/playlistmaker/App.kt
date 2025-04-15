@@ -21,6 +21,7 @@ class App : Application() {
             darkTheme = sharedPrefs.getBoolean(NIGHT_MODE, false)
             switchTheme(darkTheme)
         }
+        Creator.initApplication(this)
 
     }
 
@@ -39,5 +40,6 @@ class App : Application() {
             .apply()
 
     }
+
 
 }

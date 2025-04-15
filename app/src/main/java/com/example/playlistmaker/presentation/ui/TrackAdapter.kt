@@ -1,13 +1,14 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.presentation.ui
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlistmaker.domain.models.Track
 
 class TrackAdapter(private val clickListener: TrackClickListener) : RecyclerView.Adapter<TrackViewHolder> () {
 
     private var trackList: MutableList<Track> = mutableListOf()
-    fun updateData(newTrackList: MutableList<Track>){
-        trackList = newTrackList
+    fun updateData(newTrackList: List<Track>){
+        trackList = newTrackList.toMutableList()
         notifyDataSetChanged()
 
     }
@@ -19,7 +20,7 @@ class TrackAdapter(private val clickListener: TrackClickListener) : RecyclerView
         holder.bind(trackList[position])
         holder.itemView.setOnClickListener {
             clickListener.onTrackClick(trackList[position])
-            notifyDataSetChanged()
+            notifyItemChanged(position)
         }
     }
 
