@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="?attr/colorSecondary"
     android:orientation="vertical"
-    tools:context=".presentation.ui.SearchActivity">
+    tools:context=".search.ui.SearchActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_search"
@@ -93,7 +93,7 @@
             android:textColor="?attr/textColorSecondary"
             android:textSize="@dimen/placeholder_text_size" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/error_button"
             style="@style/Button_placeholder"
             android:layout_width="wrap_content"
@@ -133,7 +133,8 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_marginTop="@dimen/margin_track"/>
-        <Button
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/clear_history_button"
             style="@style/Button_placeholder"
             android:layout_width="wrap_content"

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
+    id("kotlin-kapt")
 }
 
 android {
@@ -16,6 +17,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 
     buildTypes {
@@ -36,7 +41,10 @@ android {
     }
 }
 
+val moxyVersion = "2.2.2"
+
 dependencies {
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -52,4 +60,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10")
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation("com.github.moxy-community:moxy:$moxyVersion")
+    implementation ("com.github.moxy-community:moxy-android:$moxyVersion")
+    kapt ("com.github.moxy-community:moxy-compiler:$moxyVersion")
+    implementation ("androidx.core:core-ktx:1.9.0")
 }
