@@ -3,7 +3,6 @@ package com.example.playlistmaker.util
 import android.app.Application
 import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.settings.domain.api.SettingsInteractor
-import com.example.playlistmaker.search.view_model.SearchViewModel
 
 class App : Application() {
 
@@ -12,17 +11,13 @@ class App : Application() {
         const val NIGHT_MODE = "themeMode"
     }
 
-    private lateinit var getSettingsInteractor: SettingsInteractor
-    var searchViewModel: SearchViewModel? = null
-
-
     override fun onCreate() {
 
         super.onCreate()
 
         Creator.initApplication(this)
 
-        getSettingsInteractor = Creator.provideSettingsInteractor(this)
+        val getSettingsInteractor = Creator.provideSettingsInteractor()
 
         getSettingsInteractor.darkThemeIsEnabled(
             object : SettingsInteractor.DarkThemeConsumer {

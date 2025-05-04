@@ -3,6 +3,10 @@ package com.example.playlistmaker.creator
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.playlistmaker.player.data.PlayerRepositoryImpl
+import com.example.playlistmaker.player.domain.PlayerInteractor
+import com.example.playlistmaker.player.domain.PlayerRepository
+import com.example.playlistmaker.player.domain.impl.PlayerInteractorImpl
 import com.example.playlistmaker.util.App.Companion.PLAYLISTMAKER_PREF
 import com.example.playlistmaker.search.data.SearchHistoryRepositoryImpl
 import com.example.playlistmaker.settings.data.SettingsRepositoryImpl
@@ -44,35 +48,33 @@ object Creator {
         return retrofit.create(ITunesApi::class.java)
     }
 
-    private fun getTrackRepository(context: Context): TracksRepository {
-        return TracksRepositoryImpl(RetrofitNetworkClient(provideITunesService(), context))
+    private fun getTrackRepository(): TracksRepository {
+        return TracksRepositoryImpl(RetrofitNetworkClient(provideITunesService(), application))
     }
-
 
     private fun getSearchHistoryRepository(): SearchHistoryRepository {
         return SearchHistoryRepositoryImpl(provideSharedPreferences(), gson)
     }
 
-    private fun getSettingsRepository(context: Context): SettingsRepository {
-        return SettingsRepositoryImpl(provideSharedPreferences(), context.resources)
+    private fun getSettingsRepository(): SettingsRepository {
+        return SettingsRepositoryImpl(provideSharedPreferences(), application.resources)
     }
 
-
-    fun provideTracksInteractor(context: Context): TracksInteractor {
-        return TracksInteractorImpl(getTrackRepository(context))
+    fun provideTracksInteractor(): TracksInteractor {
+        return TracksInteractorImpl(getTrackRepository())
     }
 
     fun provideSearchHistoryInteractor(): SearchHistoryInteractor {
         return SearchHistoryInteractorImpl(getSearchHistoryRepository())
     }
 
-    fun provideSettingsInteractor(context: Context): SettingsInteractor {
-        return SettingsInteractorImpl(getSettingsRepository(context))
+    fun provideSettingsInteractor(): SettingsInteractor {
+        return SettingsInteractorImpl(getSettingsRepository())
     }
 
-    fun provideSharingInteractor(context: Context): SharingInteractor {
-        val externalNavigator = ExternalNavigatorImpl(context)
-        val appLinkProvider = AppLinkProviderImpl(context)
+    fun provideSharingInteractor(): SharingInteractor {
+        val externalNavigator = ExternalNavigatorImpl(application)
+        val appLinkProvider = AppLinkProviderImpl(application)
         return SharingInteractorImpl(externalNavigator, appLinkProvider)
     }
 
@@ -80,5 +82,11 @@ object Creator {
         return application.getSharedPreferences(PLAYLISTMAKER_PREF, Context.MODE_PRIVATE)
     }
 
+
+    private fun getPlayerRepository(): PlayerRepository = PlayerRepositoryImpl()
+
+    fun providePlayerInteractor(): PlayerInteractor {
+         return PlayerInteractorImpl(getPlayerRepository())
+    }
 
 }

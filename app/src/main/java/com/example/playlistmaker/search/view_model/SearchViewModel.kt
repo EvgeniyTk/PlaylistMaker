@@ -1,32 +1,30 @@
 package com.example.playlistmaker.search.view_model
 
 import SingleLiveEvent
-import android.app.Application
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.search.data.dto.ResponseType
 import com.example.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.example.playlistmaker.search.domain.api.TracksInteractor
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.search.domain.models.TracksResponse
-import com.example.playlistmaker.player.ui.PlayerActivity
 import com.example.playlistmaker.search.ui.models.TracksState
 
 
-class SearchViewModel(application: Application) : AndroidViewModel(application) {
+class SearchViewModel(
+    private val getTracksInteractor: TracksInteractor,
+    private val getSearchHistoryInteractor: SearchHistoryInteractor
+) : ViewModel() {
     private var searchTextValue: String = SEARCH_TEXT_VALUE
 
     private val stateLiveData = MutableLiveData<TracksState>()
@@ -36,29 +34,29 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         stateLiveData.postValue(state)
     }
 
-    private val _hideKeyboardEvent = MutableLiveData<Unit>()
-    val hideKeyboardEvent: LiveData<Unit> get() = _hideKeyboardEvent
+    private val _hideKeyboardEvent = SingleLiveEvent<Boolean>()
+    val hideKeyboardEvent: LiveData<Boolean> get() = _hideKeyboardEvent
 
     private fun hideKeyboard() {
-        _hideKeyboardEvent.postValue(Unit)
+        _hideKeyboardEvent.value = true
     }
-
-
-    private val showHistoryPage = SingleLiveEvent<Boolean>()
-    fun observeShowHistoryPage(): LiveData<Boolean> = showHistoryPage
+    private var isInputFocused: Boolean = false
 
 
     companion object {
         const val SEARCH_TEXT_VALUE = ""
         const val SEARCH_TEXT_KEY = "SEARCH TEXT"
-        const val TRACK = "TRACK"
+
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private const val CLICK_DEBOUNCE_DELAY = 1000L
         private val SEARCH_REQUEST_TOKEN = Any()
 
-        fun getViewModelFactory(): ViewModelProvider.Factory = viewModelFactory {
+        fun getViewModelFactory(
+            tracksInteractor: TracksInteractor,
+            searchHistoryInteractor: SearchHistoryInteractor
+        ): ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                SearchViewModel(this[APPLICATION_KEY] as Application)
+                SearchViewModel(tracksInteractor, searchHistoryInteractor)
             }
         }
     }
@@ -69,14 +67,12 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private var trackListHistory: MutableList<Track> = mutableListOf()
+    private var lastSearchResult: MutableList<Track> = mutableListOf()
 
-
-    private val getTracksInteractor = Creator.provideTracksInteractor(getApplication<Application>())
-    private val getSearchHistoryInteractor = Creator.provideSearchHistoryInteractor()
     private var lastSearchText: String? = null
 
 
-    val handler = Handler(Looper.getMainLooper())
+    private val handler = Handler(Looper.getMainLooper())
 
     fun searchDebounce(changedText: String) {
         if (lastSearchText == changedText) {
@@ -101,8 +97,6 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                 postTime,
             )
         }
-
-
     }
 
     private var isClickAllowed = true
@@ -132,16 +126,22 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun onClearInputText() {
-        renderState(TracksState.Content(trackListHistory))
+        renderState(TracksState.History(trackListHistory))
         handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
     }
 
+
     fun onInputFocusChange(hasFocus: Boolean) {
+        if (isInputFocused == hasFocus) return
+
+        isInputFocused = hasFocus
         updateHistory()
-        if (hasFocus && trackListHistory.isNotEmpty()) {
-            setHistoryVisibility(true)
-        } else {
-            setHistoryVisibility(false)
+        if (lastSearchResult.isNotEmpty() && searchTextValue.isNotEmpty()) {
+            renderState(TracksState.Content(lastSearchResult))
+            return
+        }
+        if (hasFocus && trackListHistory.isNotEmpty() && searchTextValue.isEmpty()) {
+            renderState(TracksState.History(trackListHistory))
         }
     }
 
@@ -166,8 +166,6 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     private fun search(newSearchText: String) {
         hideKeyboard()
         lastSearchText = newSearchText
-        renderState(TracksState.Content(emptyList()))
-        setHistoryVisibility(false)
         if (newSearchText.isNotEmpty()) {
             renderState(TracksState.Loading)
             getTracksInteractor.searchTracks(newSearchText,
@@ -176,6 +174,8 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                         updateUi(foundTracks)
                     }
                 })
+        } else {
+            renderState(TracksState.Error(CodeError.NORESULT))
         }
     }
 
@@ -185,9 +185,10 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
             ResponseType.SUCCESS -> {
                 if (trackResponse.trackList.isNullOrEmpty()) {
                     renderState(TracksState.Error(CodeError.NORESULT))
-
                 } else {
+                    lastSearchResult = trackResponse.trackList.toMutableList()
                     renderState(TracksState.Content(trackResponse.trackList))
+
                 }
 
             }
@@ -198,45 +199,29 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    private fun updateHistory() {
+    fun updateHistory() {
         getSearchHistoryInteractor.getSavedHistory(
             object : SearchHistoryInteractor.SearchHistoryConsumer {
                 override fun consume(trackList: List<Track>) {
                     trackListHistory = trackList.toMutableList()
-                    renderState(TracksState.Content(trackListHistory))
-
+                    renderState(TracksState.History(trackListHistory))
                 }
             }
         )
     }
+    private val _openTrackEvent = SingleLiveEvent<Track>()
+    val openTrackEvent: LiveData<Track> get() = _openTrackEvent
 
     fun setTrack(track: Track) {
         if (clickDebounce()) {
             getSearchHistoryInteractor.addTrackToHistory(track)
-            val trackIntent = Intent(getApplication(), PlayerActivity::class.java)
-            trackIntent.putExtra(TRACK, track)
-            trackIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            getApplication<Application>().startActivity(trackIntent)
+            _openTrackEvent.postValue(track)
             if (trackListHistory.contains(track)) {
                 if(searchTextValue.isEmpty()){
-                    setHistoryVisibility(true)
                     updateHistory()
                 }
             }
-
-
         }
     }
 
-    fun setHistoryVisibility(isSearchFieldEmpty: Boolean) {
-        showHistoryPage.setValue(isSearchFieldEmpty)
-        if (isSearchFieldEmpty) {
-            trackListHistory.clear()
-            updateHistory()
-            renderState(TracksState.Content(trackListHistory))
-        } else {
-            showHistoryPage.setValue(false)
-            renderState(TracksState.Content(emptyList()))
-        }
-    }
 }

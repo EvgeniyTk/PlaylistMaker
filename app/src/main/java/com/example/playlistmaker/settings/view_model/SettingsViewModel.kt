@@ -43,7 +43,10 @@ class SettingsViewModel(
     }
 
     companion object {
-        fun getViewModelFactory(settingsInteractor: SettingsInteractor, sharingInteractor: SharingInteractor): ViewModelProvider.Factory = viewModelFactory {
+        fun getViewModelFactory(
+            settingsInteractor: SettingsInteractor,
+            sharingInteractor: SharingInteractor
+        ): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 SettingsViewModel(settingsInteractor, sharingInteractor)
             }

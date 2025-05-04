@@ -12,7 +12,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
+import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.databinding.ActivityPlayerBinding
+import com.example.playlistmaker.player.model.PlayerState
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.player.view_model.PlayerViewModel
 import com.example.playlistmaker.search.ui.SearchActivity.Companion.TRACK
@@ -31,33 +33,38 @@ class PlayerActivity : AppCompatActivity() {
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         enableEdgeToEdge()
         setContentView(binding.root)
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        viewModel = ViewModelProvider(this)[PlayerViewModel::class.java]
 
-        viewModel.playTime.observe(this) { time ->
-            binding.timePlay.text = time
-        }
+        viewModel = ViewModelProvider(
+            this,
+            PlayerViewModel.getViewModelFactory(
+                Creator.providePlayerInteractor()
+            ))[PlayerViewModel::class.java]
 
-        viewModel.isPlaying.observe(this) { isPlaying ->
-            if (isPlaying) {
-                binding.playButton.setImageResource(R.drawable.pause_button)
-            } else {
-                binding.playButton.setImageResource(R.drawable.play_button)
+        viewModel.playerUiState.observe(this) { state ->
+            when (state) {
+                is PlayerState.Prepared -> {
+                    binding.playButton.isEnabled = true
+                    binding.timePlay.text = state.initialTime
+                }
+
+                is PlayerState.Playing -> {
+                    binding.playButton.setImageResource(R.drawable.pause_button)
+                }
+
+                is PlayerState.Paused -> {
+                    binding.playButton.setImageResource(R.drawable.play_button)
+                }
+
+                is PlayerState.TimeUpdated -> {
+                    binding.timePlay.text = state.time
+                }
             }
-        }
-
-        viewModel.isPrepared.observe(this) { prepared ->
-            binding.playButton.isEnabled = prepared
-        }
-
-        binding.toolbarPlayer.setNavigationOnClickListener {
-            finish()
         }
 
         val track: Track? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -69,12 +76,19 @@ class PlayerActivity : AppCompatActivity() {
 
         if (track != null) {
             bindTrack(track)
+            viewModel.setTrack(track)
             viewModel.setUrl(track.previewUrl)
         }
 
         binding.playButton.setOnClickListener {
             viewModel.playbackControl()
         }
+
+        binding.toolbarPlayer.setNavigationOnClickListener {
+            finish()
+        }
+
+
     }
 
     private fun bindTrack(track: Track) {

@@ -1,5 +1,6 @@
 package com.example.playlistmaker.search.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -13,12 +14,13 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.playlistmaker.R
+import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.databinding.ActivitySearchBinding
+import com.example.playlistmaker.player.ui.PlayerActivity
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.search.view_model.SearchViewModel
 import com.example.playlistmaker.search.view_model.SearchViewModel.CodeError
 import com.example.playlistmaker.search.ui.models.TracksState
-import com.example.playlistmaker.util.App
 
 class SearchActivity : AppCompatActivity() {
 
@@ -30,7 +32,6 @@ class SearchActivity : AppCompatActivity() {
 
     private var simpleTextWatcher: TextWatcher? = null
 
-
     companion object {
         const val TRACK = "TRACK"
     }
@@ -39,10 +40,6 @@ class SearchActivity : AppCompatActivity() {
         super.onDestroy()
         simpleTextWatcher?.let { binding.searchInputEditText.removeTextChangedListener(it) }
 
-
-        if (isFinishing) {
-            (this.application as? App)?.searchViewModel = null
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,21 +51,26 @@ class SearchActivity : AppCompatActivity() {
 
         searchViewModel = ViewModelProvider(
             this,
-            SearchViewModel.getViewModelFactory()
+            SearchViewModel.getViewModelFactory(
+                Creator.provideTracksInteractor(),
+                Creator.provideSearchHistoryInteractor()
+            )
         )[SearchViewModel::class.java]
 
         searchViewModel.observeState().observe(this) {
             render(it)
         }
 
+        searchViewModel.openTrackEvent.observe(this) {
+            val trackIntent = Intent(this, PlayerActivity::class.java).apply {
+                putExtra(TRACK, it)
+            }
+            startActivity(trackIntent)
+        }
+
         searchViewModel.hideKeyboardEvent.observe(this) {
             hideKeyboard()
         }
-
-        searchViewModel.observeShowHistoryPage().observe(this) {
-            showHistoryPage(it)
-        }
-
 
         adapter = TrackAdapter { searchViewModel.setTrack(it) }
 
@@ -93,15 +95,19 @@ class SearchActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 binding.clearButton.isVisible = !s.isNullOrEmpty()
                 if (s.isNullOrEmpty()) {
-                    showContent(emptyList())
+
+                    searchViewModel.updateHistory()
                     searchViewModel.removeCallbacks()
                 } else {
+
                     searchViewModel.searchDebounce(
                         changedText = s.toString()
                     )
                 }
-                searchViewModel.setHistoryVisibility(binding.searchInputEditText.hasFocus() && s?.isEmpty() == true)
-                binding.trackList.visibility = View.VISIBLE
+
+                if (binding.searchInputEditText.hasFocus() && s.isNullOrEmpty()) {
+                    searchViewModel.updateHistory()
+                }
 
             }
 
@@ -134,9 +140,10 @@ class SearchActivity : AppCompatActivity() {
         }
 
         binding.searchInputEditText.setOnFocusChangeListener { _, hasFocus ->
-            searchViewModel.onInputFocusChange(hasFocus)
-        }
 
+            searchViewModel.onInputFocusChange(hasFocus)
+
+        }
 
     }
 
@@ -151,12 +158,16 @@ class SearchActivity : AppCompatActivity() {
         binding.placeholderError.visibility = View.GONE
         binding.errorButton.visibility = View.GONE
         binding.trackList.visibility = View.GONE
+        binding.clearHistoryButton.visibility = View.GONE
+        binding.searchHistoryHeader.visibility = View.GONE
     }
 
     private fun showError(code: CodeError) {
         binding.placeholderError.visibility = View.VISIBLE
         binding.progressBar.visibility = View.GONE
         binding.trackList.visibility = View.GONE
+        binding.clearHistoryButton.visibility = View.GONE
+        binding.searchHistoryHeader.visibility = View.GONE
 
         when (code) {
             CodeError.NORESULT -> {
@@ -173,19 +184,23 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    fun showContent(list: List<Track>) {
+    private fun showContent(list: List<Track>) {
         binding.progressBar.visibility = View.GONE
         binding.placeholderError.visibility = View.GONE
         binding.errorButton.visibility = View.GONE
+        binding.clearHistoryButton.visibility = View.GONE
+        binding.searchHistoryHeader.visibility = View.GONE
         showTracks(list)
-
     }
 
-    private fun showHistoryPage(isVisible: Boolean) {
-        binding.clearHistoryButton.visibility = if (isVisible) View.VISIBLE else View.GONE
-        binding.searchHistoryHeader.visibility = if (isVisible) View.VISIBLE else View.GONE
+    private fun showHistory(list: List<Track>) {
+        binding.progressBar.visibility = View.GONE
+        binding.placeholderError.visibility = View.GONE
+        binding.errorButton.visibility = View.GONE
+        binding.clearHistoryButton.visibility = View.VISIBLE
+        binding.searchHistoryHeader.visibility = View.VISIBLE
+        showTracks(list)
     }
-
 
     private fun hideKeyboard() {
         val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
@@ -197,6 +212,7 @@ class SearchActivity : AppCompatActivity() {
             is TracksState.Loading -> showLoading()
             is TracksState.Content -> showContent(state.list)
             is TracksState.Error -> showError(state.code)
+            is TracksState.History -> showHistory(state.list)
         }
     }
 
@@ -204,6 +220,5 @@ class SearchActivity : AppCompatActivity() {
         adapter.updateData(trackList)
         binding.trackList.visibility = if (trackList.isEmpty()) View.GONE else View.VISIBLE
     }
-
 
 }

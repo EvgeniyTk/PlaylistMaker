@@ -12,4 +12,7 @@ sealed interface TracksState {
         val code: SearchViewModel.CodeError
     ): TracksState
 
+    data class History(val list: List<Track>) : TracksState
+
+
 }

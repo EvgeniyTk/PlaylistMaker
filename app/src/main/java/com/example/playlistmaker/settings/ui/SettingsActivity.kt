@@ -33,8 +33,8 @@ class SettingsActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(
             this,
             SettingsViewModel.getViewModelFactory(
-                Creator.provideSettingsInteractor(this),
-                Creator.provideSharingInteractor(this) // добавляем SharingInteractor
+                Creator.provideSettingsInteractor(),
+                Creator.provideSharingInteractor() // добавляем SharingInteractor
             )
         )[SettingsViewModel::class.java]
 

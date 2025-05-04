@@ -13,18 +13,7 @@ class RetrofitNetworkClient(private val iTunesService: ITunesApi, private val co
 
 
     override fun doRequest(dto: Any): Response {
-//        return try {
-//            if (dto is TrackSearchRequest) {
-//                val resp = iTunesService.search(dto.expression).execute()
-//                val body = resp.body() ?: Response()
-//
-//                 body.apply { responseType = ResponseType.SUCCESS }
-//            } else {
-//                Response().apply { responseType = ResponseType.BAD_CONNECTION }
-//            }
-//        } catch (e: Exception) {
-//            Response().apply { responseType = ResponseType.BAD_CONNECTION }
-//        }
+
 
         if (!isConnected()) {
             return Response().apply { responseType = ResponseType.BAD_CONNECTION }
