@@ -15,7 +15,7 @@ class SettingsRepositoryImpl(private val sharedPref: SharedPreferences, private 
         return (resources.configuration.uiMode and UI_MODE_NIGHT_MASK) == UI_MODE_NIGHT_YES
     }
 
-    override fun DarkThemeIsEnabled(): Boolean {
+    override fun darkThemeIsEnabled(): Boolean {
         return sharedPref.getBoolean(NIGHT_MODE, isSystemDarkTheme())
     }
 

@@ -11,23 +11,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.databinding.ActivitySearchBinding
 import com.example.playlistmaker.player.ui.PlayerActivity
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.search.view_model.SearchViewModel
 import com.example.playlistmaker.search.view_model.SearchViewModel.CodeError
 import com.example.playlistmaker.search.ui.models.TracksState
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySearchBinding
 
-    private lateinit var searchViewModel: SearchViewModel
-
+    private val searchViewModel: SearchViewModel by viewModel()
     private lateinit var adapter: TrackAdapter
 
     private var simpleTextWatcher: TextWatcher? = null
@@ -48,14 +46,6 @@ class SearchActivity : AppCompatActivity() {
         setContentView(binding.root)
         enableEdgeToEdge()
 
-
-        searchViewModel = ViewModelProvider(
-            this,
-            SearchViewModel.getViewModelFactory(
-                Creator.provideTracksInteractor(),
-                Creator.provideSearchHistoryInteractor()
-            )
-        )[SearchViewModel::class.java]
 
         searchViewModel.observeState().observe(this) {
             render(it)
@@ -197,8 +187,14 @@ class SearchActivity : AppCompatActivity() {
         binding.progressBar.visibility = View.GONE
         binding.placeholderError.visibility = View.GONE
         binding.errorButton.visibility = View.GONE
-        binding.clearHistoryButton.visibility = View.VISIBLE
-        binding.searchHistoryHeader.visibility = View.VISIBLE
+        if (list.isNotEmpty()) {
+            binding.clearHistoryButton.visibility = View.VISIBLE
+            binding.searchHistoryHeader.visibility = View.VISIBLE
+
+        } else {
+            binding.clearHistoryButton.visibility = View.GONE
+            binding.searchHistoryHeader.visibility = View.GONE
+        }
         showTracks(list)
     }
 
