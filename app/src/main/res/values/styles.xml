@@ -64,7 +64,7 @@
 
         <item name="textAllCaps">false</item>
     </style>
-    <!-- <item name="android:visibility">gone</item> -->
+
 
     <style name="Track_info_description">
         <item name="android:fontFamily">@font/ys_display_regular</item>

@@ -10,9 +10,6 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.playlistmaker.search.data.dto.ResponseType
 import com.example.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.example.playlistmaker.search.domain.api.TracksInteractor
@@ -51,14 +48,6 @@ class SearchViewModel(
         private const val CLICK_DEBOUNCE_DELAY = 1000L
         private val SEARCH_REQUEST_TOKEN = Any()
 
-        fun getViewModelFactory(
-            tracksInteractor: TracksInteractor,
-            searchHistoryInteractor: SearchHistoryInteractor
-        ): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                SearchViewModel(tracksInteractor, searchHistoryInteractor)
-            }
-        }
     }
 
     enum class CodeError {

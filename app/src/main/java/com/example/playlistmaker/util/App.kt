@@ -1,8 +1,15 @@
 package com.example.playlistmaker.util
 
 import android.app.Application
-import com.example.playlistmaker.creator.Creator
+import com.example.playlistmaker.di.dataModule
+import com.example.playlistmaker.di.interactorModule
+import com.example.playlistmaker.di.repositoryModule
+import com.example.playlistmaker.di.viewModelModule
 import com.example.playlistmaker.settings.domain.api.SettingsInteractor
+import org.koin.android.ext.android.getKoin
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 
 class App : Application() {
 
@@ -14,19 +21,16 @@ class App : Application() {
     override fun onCreate() {
 
         super.onCreate()
+        startKoin {
+            printLogger(Level.DEBUG)
+            androidContext(this@App)
+            modules(dataModule, interactorModule, repositoryModule, viewModelModule)
+        }
 
-        Creator.initApplication(this)
 
-        val getSettingsInteractor = Creator.provideSettingsInteractor()
+        val getSettingsInteractor = getKoin().get<SettingsInteractor>()
 
-        getSettingsInteractor.darkThemeIsEnabled(
-            object : SettingsInteractor.DarkThemeConsumer {
-                override fun consume(darkThemeIsEnabled: Boolean) {
-                    getSettingsInteractor.applyDarkTheme(darkThemeIsEnabled)
-                }
-
-            }
-        )
+        getSettingsInteractor.applyDarkTheme(getSettingsInteractor.darkThemeIsEnabled())
 
     }
 }

@@ -3,9 +3,6 @@ package com.example.playlistmaker.player.view_model
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.playlistmaker.player.domain.PlayerInteractor
 import com.example.playlistmaker.player.model.PlayerState
 import com.example.playlistmaker.search.domain.models.Track
@@ -46,13 +43,4 @@ class PlayerViewModel(
         playerInteractor.release()
     }
 
-    companion object {
-        fun getViewModelFactory(
-            playerInteractor: PlayerInteractor
-        ): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                PlayerViewModel(playerInteractor)
-            }
-        }
-    }
 }

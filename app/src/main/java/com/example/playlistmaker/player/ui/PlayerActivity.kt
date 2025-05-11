@@ -7,24 +7,23 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.databinding.ActivityPlayerBinding
 import com.example.playlistmaker.player.model.PlayerState
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.player.view_model.PlayerViewModel
 import com.example.playlistmaker.search.ui.SearchActivity.Companion.TRACK
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 
 class PlayerActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: PlayerViewModel
+    private val viewModel by viewModel<PlayerViewModel>()
 
     private lateinit var binding: ActivityPlayerBinding
 
@@ -38,13 +37,6 @@ class PlayerActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-
-        viewModel = ViewModelProvider(
-            this,
-            PlayerViewModel.getViewModelFactory(
-                Creator.providePlayerInteractor()
-            ))[PlayerViewModel::class.java]
 
         viewModel.playerUiState.observe(this) { state ->
             when (state) {

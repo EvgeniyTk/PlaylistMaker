@@ -22,15 +22,20 @@ class RetrofitNetworkClient(private val iTunesService: ITunesApi, private val co
             return Response().apply { responseType = ResponseType.BAD_REQUEST }
         }
 
-        val resp = iTunesService.search(dto.expression).execute()
-        val body = resp.body()
-        return (body ?: Response()).apply {
-            responseType = when (resp.code()) {
-                200 -> ResponseType.SUCCESS
-                400 -> ResponseType.BAD_REQUEST
-                502 -> ResponseType.BAD_CONNECTION
-                else -> ResponseType.UNKNOWN
+        return try {
+            val resp = iTunesService.search(dto.expression).execute()
+            val body = resp.body()
+
+            (body ?: Response()).apply {
+                responseType = when (resp.code()) {
+                    200 -> ResponseType.SUCCESS
+                    400 -> ResponseType.BAD_REQUEST
+                    502 -> ResponseType.BAD_CONNECTION
+                    else -> ResponseType.UNKNOWN
+                }
             }
+        } catch (e: Exception) {
+            Response().apply { responseType = ResponseType.BAD_CONNECTION }
         }
 
     }
