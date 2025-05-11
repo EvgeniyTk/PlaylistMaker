@@ -1,5 +1,6 @@
 package com.example.playlistmaker.di
 
+
 import com.example.playlistmaker.player.data.PlayerRepositoryImpl
 import com.example.playlistmaker.player.domain.PlayerRepository
 import com.example.playlistmaker.search.data.TracksRepositoryImpl
@@ -12,20 +13,20 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val repositoryModule = module {
-    single<TracksRepository> {
+    factory<TracksRepository> {
         TracksRepositoryImpl(get())
     }
 
-    single<SettingsRepository> {
+    factory<SettingsRepository> {
         SettingsRepositoryImpl(get(), get())
     }
 
-    single<ExternalNavigator> {
+    factory<ExternalNavigator> {
         ExternalNavigatorImpl(androidContext())
     }
 
     factory<PlayerRepository> {
-        PlayerRepositoryImpl()
+        PlayerRepositoryImpl(get())
     }
 
 }
