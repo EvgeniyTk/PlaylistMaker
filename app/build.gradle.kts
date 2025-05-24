@@ -65,4 +65,6 @@ dependencies {
     kapt (libs.moxy.compiler)
     implementation (libs.androidx.core.ktx.v190)
     implementation (libs.koin.android)
+    implementation(libs.androidx.fragment.ktx)
+    implementation (libs.material.v180)
 }
