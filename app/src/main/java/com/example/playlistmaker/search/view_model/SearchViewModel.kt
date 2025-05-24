@@ -40,15 +40,6 @@ class SearchViewModel(
     private var isInputFocused: Boolean = false
 
 
-    companion object {
-        const val SEARCH_TEXT_VALUE = ""
-        const val SEARCH_TEXT_KEY = "SEARCH TEXT"
-
-        private const val SEARCH_DEBOUNCE_DELAY = 2000L
-        private const val CLICK_DEBOUNCE_DELAY = 1000L
-        private val SEARCH_REQUEST_TOKEN = Any()
-
-    }
 
     enum class CodeError {
         NORESULT,
@@ -211,6 +202,17 @@ class SearchViewModel(
                 }
             }
         }
+    }
+
+
+    companion object {
+        const val SEARCH_TEXT_VALUE = ""
+        const val SEARCH_TEXT_KEY = "SEARCH TEXT"
+
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
+        private val SEARCH_REQUEST_TOKEN = Any()
+
     }
 
 }
