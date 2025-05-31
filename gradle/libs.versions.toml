@@ -4,6 +4,7 @@ agp = "8.7.2"
 converterGson = "2.11.0"
 coreKtxVersion = "1.9.0"
 fragmentKtx = "1.5.5"
+fragmentKtxVersion = "1.5.6"
 glide = "4.14.2"
 gson = "2.10.1"
 koinAndroid = "3.3.0"
@@ -18,12 +19,16 @@ activity = "1.8.0"
 constraintlayout = "2.1.4"
 materialVersion = "1.8.0"
 moxyVersion = "2.2.2"
+navigationFragmentKtx = "2.5.3"
 
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-ktx-v190 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
+androidx-fragment-ktx-v156 = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtxVersion" }
+androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationFragmentKtx" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }

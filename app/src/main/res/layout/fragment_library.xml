@@ -7,12 +7,11 @@
     android:layout_height="match_parent"
     android:background="?attr/colorSecondary"
     android:orientation="vertical"
-    tools:context=".library.ui.LibraryActivity">
+    tools:context=".library.ui.LibraryFragment">
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_media_library"
         style="@style/Toolbar"
         android:layout_marginBottom="0dp"
-        app:navigationIcon="@drawable/back"
         app:title="@string/medialib"
         app:titleTextAppearance="@style/ToolbarTitleText" />
     <com.google.android.material.tabs.TabLayout

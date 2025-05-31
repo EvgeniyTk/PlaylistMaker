@@ -2,43 +2,44 @@ package com.example.playlistmaker.player.ui
 
 import android.os.Build
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
-import com.example.playlistmaker.databinding.ActivityPlayerBinding
+import com.example.playlistmaker.databinding.FragmentPlayerBinding
 import com.example.playlistmaker.player.model.PlayerState
-import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.player.view_model.PlayerViewModel
-import com.example.playlistmaker.search.ui.SearchActivity.Companion.TRACK
+import com.example.playlistmaker.search.domain.models.Track
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-
-class PlayerActivity : AppCompatActivity() {
-
+class PlayerFragment : Fragment() {
     private val viewModel by viewModel<PlayerViewModel>()
 
-    private lateinit var binding: ActivityPlayerBinding
+    private var _binding: FragmentPlayerBinding? = null
+    private val binding get() = _binding!!
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityPlayerBinding.inflate(layoutInflater)
-        enableEdgeToEdge()
-        setContentView(binding.root)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentPlayerBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        viewModel.playerUiState.observe(this) { state ->
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+
+        viewModel.playerUiState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is PlayerState.Prepared -> {
                     binding.playButton.isEnabled = true
@@ -60,10 +61,10 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         val track: Track? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(TRACK, Track::class.java)
+            requireArguments().getParcelable(ARGS_TRACK, Track::class.java)
         } else {
             @Suppress("DEPRECATION")
-            intent.getParcelableExtra(TRACK)
+            requireArguments().getParcelable(ARGS_TRACK)
         }
 
         if (track != null) {
@@ -77,14 +78,14 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         binding.toolbarPlayer.setNavigationOnClickListener {
-            finish()
+            findNavController().navigateUp()
         }
 
 
     }
 
     private fun bindTrack(track: Track) {
-        Glide.with(applicationContext)
+        Glide.with(requireContext())
             .load(track.getCoverArtwork())
             .transform(CenterCrop(), RoundedCorners(16))
             .placeholder(R.drawable.track_placeholder)
@@ -109,5 +110,16 @@ class PlayerActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         viewModel.pauseIfNeeded()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    companion object {
+        private const val ARGS_TRACK = "track"
+        fun createArgs(track: Track): Bundle = bundleOf(ARGS_TRACK to track)
+
     }
 }
