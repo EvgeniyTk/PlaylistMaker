@@ -7,13 +7,12 @@
     android:layout_height="match_parent"
     android:background="?attr/colorSecondary"
     android:orientation="vertical"
-    tools:context=".search.ui.SearchActivity">
+    tools:context=".search.ui.SearchFragment">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_search"
         style="@style/Toolbar"
         android:layout_marginBottom="0dp"
-        app:navigationIcon="@drawable/back"
         app:title="@string/search"
         app:titleTextAppearance="@style/ToolbarTitleText" />
 

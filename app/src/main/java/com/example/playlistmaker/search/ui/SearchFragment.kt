@@ -1,77 +1,76 @@
 package com.example.playlistmaker.search.ui
 
-import android.content.Intent
+
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.appcompat.app.AppCompatActivity.INPUT_METHOD_SERVICE
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.playlistmaker.R
-import com.example.playlistmaker.databinding.ActivitySearchBinding
-import com.example.playlistmaker.player.ui.PlayerActivity
+import com.example.playlistmaker.databinding.FragmentSearchBinding
+import com.example.playlistmaker.player.ui.PlayerFragment
 import com.example.playlistmaker.search.domain.models.Track
+import com.example.playlistmaker.search.ui.models.TracksState
 import com.example.playlistmaker.search.view_model.SearchViewModel
 import com.example.playlistmaker.search.view_model.SearchViewModel.CodeError
-import com.example.playlistmaker.search.ui.models.TracksState
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class SearchActivity : AppCompatActivity() {
+class SearchFragment: Fragment() {
+    private lateinit var binding: FragmentSearchBinding
 
-    private lateinit var binding: ActivitySearchBinding
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentSearchBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     private val searchViewModel: SearchViewModel by viewModel()
     private lateinit var adapter: TrackAdapter
 
     private var simpleTextWatcher: TextWatcher? = null
 
-    companion object {
-        const val TRACK = "TRACK"
-    }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         simpleTextWatcher?.let { binding.searchInputEditText.removeTextChangedListener(it) }
 
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivitySearchBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        enableEdgeToEdge()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-
-        searchViewModel.observeState().observe(this) {
+        searchViewModel.observeState().observe(viewLifecycleOwner) {
             render(it)
         }
 
-        searchViewModel.openTrackEvent.observe(this) {
-            val trackIntent = Intent(this, PlayerActivity::class.java).apply {
-                putExtra(TRACK, it)
+        searchViewModel.openTrackEvent.observe(viewLifecycleOwner) { track ->
+            track.let {
+                findNavController().navigate(R.id.action_searchFragment_to_playerFragment, PlayerFragment.createArgs(track))
             }
-            startActivity(trackIntent)
         }
 
-        searchViewModel.hideKeyboardEvent.observe(this) {
-            hideKeyboard()
-        }
 
         adapter = TrackAdapter { searchViewModel.setTrack(it) }
 
-        binding.trackList.layoutManager = LinearLayoutManager(this)
+
+        searchViewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
+            hideKeyboard()
+        }
+
+
+        binding.trackList.layoutManager = LinearLayoutManager(requireContext())
         binding.trackList.adapter = adapter
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.search)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
 
         if (savedInstanceState != null) {
             searchViewModel.restoreInstanceState(savedInstanceState)
@@ -109,10 +108,6 @@ class SearchActivity : AppCompatActivity() {
 
         simpleTextWatcher?.let { binding.searchInputEditText.addTextChangedListener(it) }
 
-        binding.toolbarSearch.setNavigationOnClickListener {
-            finish()
-        }
-
         binding.clearHistoryButton.setOnClickListener {
             searchViewModel.onClearHistory()
             binding.searchInputEditText.clearFocus()
@@ -134,9 +129,7 @@ class SearchActivity : AppCompatActivity() {
             searchViewModel.onInputFocusChange(hasFocus)
 
         }
-
     }
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         searchViewModel.saveInstanceState(outState)
@@ -199,8 +192,10 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun hideKeyboard() {
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+        val imm = requireContext().getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        view?.let {
+            imm.hideSoftInputFromWindow(it.windowToken, 0)
+        }
     }
 
     private fun render(state: TracksState) {
@@ -216,5 +211,4 @@ class SearchActivity : AppCompatActivity() {
         adapter.updateData(trackList)
         binding.trackList.visibility = if (trackList.isEmpty()) View.GONE else View.VISIBLE
     }
-
 }
