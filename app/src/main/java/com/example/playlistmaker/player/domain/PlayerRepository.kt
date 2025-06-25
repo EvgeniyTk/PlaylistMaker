@@ -10,5 +10,6 @@ interface PlayerRepository {
     fun release()
     fun isPlaying(): Boolean
     fun isPrepared(): Boolean
+    fun formatTime(time: Int): String
     fun getCurrentTimeFormatted(): String
 }

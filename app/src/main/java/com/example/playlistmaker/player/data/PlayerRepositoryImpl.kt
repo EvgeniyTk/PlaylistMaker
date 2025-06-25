@@ -48,6 +48,11 @@ class PlayerRepositoryImpl(private val mediaPlayer: MediaPlayer) : PlayerReposit
 
     override fun isPrepared(): Boolean = prepared
 
+    override fun formatTime(time: Int): String {
+        return dateFormat.format(time)
+    }
+
     override fun getCurrentTimeFormatted(): String =
         dateFormat.format(mediaPlayer.currentPosition)
+
 }

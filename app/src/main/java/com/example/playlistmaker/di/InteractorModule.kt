@@ -26,8 +26,8 @@ val interactorModule = module {
         SettingsInteractorImpl(get())
     }
 
-    factory<(CoroutineScope) -> PlayerInteractor> {
-        {scope -> PlayerInteractorImpl(get(), scope)}
+    factory<PlayerInteractor> {
+        PlayerInteractorImpl(get())
     }
 
     factory<SharingInteractor> {
