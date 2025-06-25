@@ -1,24 +1,36 @@
 package com.example.playlistmaker.player.domain.impl
 
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.playlistmaker.player.domain.PlayerInteractor
 import com.example.playlistmaker.player.domain.PlayerRepository
 import com.example.playlistmaker.player.model.PlayerState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class PlayerInteractorImpl(
-    private val repository: PlayerRepository
+    private val repository: PlayerRepository,
+    private val coroutineScope: CoroutineScope
 ) : PlayerInteractor {
 
     private val _playerState = MutableLiveData<PlayerState>()
-    private val handler = Handler(Looper.getMainLooper())
-    private val updateRunnable = object : Runnable {
-        override fun run() {
-            _playerState.value = PlayerState.TimeUpdated(repository.getCurrentTimeFormatted())
-            handler.postDelayed(this, 330L)
+    private var timerJob: Job? = null
+
+    private fun startTimer() {
+        stopTimer()
+        timerJob = coroutineScope.launch {
+            while (repository.isPlaying()) {
+                delay(330L)
+                _playerState.postValue(PlayerState.TimeUpdated(repository.getCurrentTimeFormatted()))
+            }
         }
+    }
+
+    private fun stopTimer(){
+        timerJob?.cancel()
+        timerJob = null
     }
 
     override fun getPlayerState(): LiveData<PlayerState> = _playerState
@@ -31,7 +43,7 @@ class PlayerInteractorImpl(
         repository.setOnCompletionListener {
             _playerState.value = PlayerState.Prepared("00:00")
             _playerState.value = PlayerState.Paused
-            handler.removeCallbacks(updateRunnable)
+            stopTimer()
         }
     }
 
@@ -45,13 +57,13 @@ class PlayerInteractorImpl(
     private fun play() {
         repository.start()
         _playerState.value = PlayerState.Playing
-        handler.post(updateRunnable)
+        startTimer()
     }
 
     private fun pause() {
         repository.pause()
         _playerState.value = PlayerState.Paused
-        handler.removeCallbacks(updateRunnable)
+        stopTimer()
     }
 
     override fun pauseIfNeeded() {
@@ -62,6 +74,7 @@ class PlayerInteractorImpl(
 
     override fun release() {
         repository.release()
-        handler.removeCallbacks(updateRunnable)
+        stopTimer()
+        _playerState.value = PlayerState.Prepared("00:00")
     }
 }
