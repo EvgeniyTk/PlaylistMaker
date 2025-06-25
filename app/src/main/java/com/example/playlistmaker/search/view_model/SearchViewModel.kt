@@ -1,21 +1,22 @@
 package com.example.playlistmaker.search.view_model
 
 import SingleLiveEvent
-import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.search.data.dto.ResponseType
 import com.example.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.example.playlistmaker.search.domain.api.TracksInteractor
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.search.domain.models.TracksResponse
 import com.example.playlistmaker.search.ui.models.TracksState
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 
 
 class SearchViewModel(
@@ -37,8 +38,8 @@ class SearchViewModel(
     private fun hideKeyboard() {
         _hideKeyboardEvent.value = true
     }
-    private var isInputFocused: Boolean = false
 
+    private var isInputFocused: Boolean = false
 
 
     enum class CodeError {
@@ -51,31 +52,18 @@ class SearchViewModel(
 
     private var lastSearchText: String? = null
 
-
-    private val handler = Handler(Looper.getMainLooper())
+    private var searchJob: Job? = null
 
     fun searchDebounce(changedText: String) {
         if (lastSearchText == changedText) {
             return
         }
-        this.lastSearchText = changedText
-        handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
 
-        val searchRunnable = Runnable { search(changedText) }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            handler.postDelayed(
-                searchRunnable,
-                SEARCH_REQUEST_TOKEN,
-                SEARCH_DEBOUNCE_DELAY
-            )
-        } else {
-            val postTime = SystemClock.uptimeMillis() + SEARCH_DEBOUNCE_DELAY
-            handler.postAtTime(
-                searchRunnable,
-                SEARCH_REQUEST_TOKEN,
-                postTime,
-            )
+        lastSearchText = changedText
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(SEARCH_DEBOUNCE_DELAY)
+            search(changedText)
         }
     }
 
@@ -86,13 +74,17 @@ class SearchViewModel(
         val current = isClickAllowed
         if (isClickAllowed) {
             isClickAllowed = false
-            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+            viewModelScope.launch {
+                delay(CLICK_DEBOUNCE_DELAY)
+                isClickAllowed = true
+            }
         }
         return current
     }
 
-    override fun onCleared() {
-        handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
+    fun cancelSearchJob() {
+        searchJob?.cancel()
+        searchJob = null
     }
 
 
@@ -101,13 +93,8 @@ class SearchViewModel(
         updateHistory()
     }
 
-    fun removeCallbacks() {
-        handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
-    }
-
     fun onClearInputText() {
         renderState(TracksState.History(trackListHistory))
-        handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
     }
 
 
@@ -148,12 +135,17 @@ class SearchViewModel(
         lastSearchText = newSearchText
         if (newSearchText.isNotEmpty()) {
             renderState(TracksState.Loading)
-            getTracksInteractor.searchTracks(newSearchText,
-                object : TracksInteractor.TracksConsumer {
-                    override fun consume(foundTracks: TracksResponse) {
+            viewModelScope.launch {
+                getTracksInteractor
+                    .searchTracks(newSearchText)
+                    .catch {e ->
+                        Log.e("SearchViewModel", "Unexpected error", e)
+                        renderState(TracksState.Error(CodeError.BADCONNECTION))
+                    }
+                    .collect{foundTracks ->
                         updateUi(foundTracks)
                     }
-                })
+            }
         } else {
             renderState(TracksState.Error(CodeError.NORESULT))
         }
@@ -189,6 +181,7 @@ class SearchViewModel(
             }
         )
     }
+
     private val _openTrackEvent = SingleLiveEvent<Track>()
     val openTrackEvent: LiveData<Track> get() = _openTrackEvent
 
@@ -197,7 +190,7 @@ class SearchViewModel(
             getSearchHistoryInteractor.addTrackToHistory(track)
             _openTrackEvent.postValue(track)
             if (trackListHistory.contains(track)) {
-                if(searchTextValue.isEmpty()){
+                if (searchTextValue.isEmpty()) {
                     updateHistory()
                 }
             }
@@ -211,7 +204,6 @@ class SearchViewModel(
 
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private const val CLICK_DEBOUNCE_DELAY = 1000L
-        private val SEARCH_REQUEST_TOKEN = Any()
 
     }
 

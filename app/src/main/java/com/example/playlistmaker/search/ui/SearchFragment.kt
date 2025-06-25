@@ -11,20 +11,25 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity.INPUT_METHOD_SERVICE
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentSearchBinding
+import com.example.playlistmaker.main.ui.RootActivity
 import com.example.playlistmaker.player.ui.PlayerFragment
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.search.ui.models.TracksState
 import com.example.playlistmaker.search.view_model.SearchViewModel
 import com.example.playlistmaker.search.view_model.SearchViewModel.CodeError
+import com.example.playlistmaker.util.debounce
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class SearchFragment: Fragment() {
+class SearchFragment : Fragment() {
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var onTrackClickDebounce: (Track) -> Unit
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,14 +56,27 @@ class SearchFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        onTrackClickDebounce = debounce<Track>(
+            CLICK_DEBOUNCE_DELAY,
+            viewLifecycleOwner.lifecycleScope,
+            false
+        ) { track ->
+            findNavController().navigate(
+                R.id.action_searchFragment_to_playerFragment,
+                PlayerFragment.createArgs(track)
+            )
+        }
+
         searchViewModel.observeState().observe(viewLifecycleOwner) {
             render(it)
         }
 
         searchViewModel.openTrackEvent.observe(viewLifecycleOwner) { track ->
-            track.let {
-                findNavController().navigate(R.id.action_searchFragment_to_playerFragment, PlayerFragment.createArgs(track))
+            view.post{
+                (activity as? RootActivity)?.animateBottomNavigationView()
+                onTrackClickDebounce(track)
             }
+
         }
 
 
@@ -88,7 +106,7 @@ class SearchFragment: Fragment() {
                 if (s.isNullOrEmpty()) {
 
                     searchViewModel.updateHistory()
-                    searchViewModel.removeCallbacks()
+                    searchViewModel.cancelSearchJob()
                 } else {
 
                     searchViewModel.searchDebounce(
@@ -132,6 +150,7 @@ class SearchFragment: Fragment() {
 
         }
     }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         searchViewModel.saveInstanceState(outState)
@@ -212,5 +231,9 @@ class SearchFragment: Fragment() {
     private fun showTracks(trackList: List<Track>) {
         adapter.updateData(trackList)
         binding.trackList.visibility = if (trackList.isEmpty()) View.GONE else View.VISIBLE
+    }
+
+    companion object {
+        private const val CLICK_DEBOUNCE_DELAY = 300L
     }
 }

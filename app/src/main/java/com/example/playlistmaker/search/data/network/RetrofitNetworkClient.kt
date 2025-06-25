@@ -7,12 +7,14 @@ import com.example.playlistmaker.search.data.NetworkClient
 import com.example.playlistmaker.search.data.dto.Response
 import com.example.playlistmaker.search.data.dto.ResponseType
 import com.example.playlistmaker.search.data.dto.TrackSearchRequest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class RetrofitNetworkClient(private val iTunesService: ITunesApi, private val context: Context) :
     NetworkClient {
 
 
-    override fun doRequest(dto: Any): Response {
+    override suspend fun doRequest(dto: Any): Response {
 
 
         if (!isConnected()) {
@@ -22,20 +24,15 @@ class RetrofitNetworkClient(private val iTunesService: ITunesApi, private val co
             return Response().apply { responseType = ResponseType.BAD_REQUEST }
         }
 
-        return try {
-            val resp = iTunesService.search(dto.expression).execute()
-            val body = resp.body()
+        return withContext(Dispatchers.IO) {
+            try {
+                val resp = iTunesService.search(dto.expression)
+                resp.apply { responseType = ResponseType.SUCCESS }
 
-            (body ?: Response()).apply {
-                responseType = when (resp.code()) {
-                    200 -> ResponseType.SUCCESS
-                    400 -> ResponseType.BAD_REQUEST
-                    502 -> ResponseType.BAD_CONNECTION
-                    else -> ResponseType.UNKNOWN
-                }
+            } catch (e: Throwable) {
+                Response().apply { responseType = ResponseType.BAD_CONNECTION }
             }
-        } catch (e: Exception) {
-            Response().apply { responseType = ResponseType.BAD_CONNECTION }
+
         }
 
     }

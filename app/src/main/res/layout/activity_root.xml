@@ -6,7 +6,8 @@
     tools:context=".main.ui.RootActivity"
     android:background="?attr/colorSecondary"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:animateLayoutChanges="true">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/rootFragmentContainerView"
