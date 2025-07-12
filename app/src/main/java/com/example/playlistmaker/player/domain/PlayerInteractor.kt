@@ -9,4 +9,6 @@ interface PlayerInteractor {
     fun pauseIfNeeded()
     fun release()
     fun getPlayerState(): LiveData<PlayerState>
+    fun updateCurrentTime()
+    fun isPlaying(): Boolean
 }

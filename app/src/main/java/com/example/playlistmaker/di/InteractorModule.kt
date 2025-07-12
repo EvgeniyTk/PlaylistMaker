@@ -10,6 +10,7 @@ import com.example.playlistmaker.settings.domain.api.SettingsInteractor
 import com.example.playlistmaker.settings.domain.impl.SettingsInteractorImpl
 import com.example.playlistmaker.sharing.domain.api.SharingInteractor
 import com.example.playlistmaker.sharing.domain.impl.SharingInteractorImpl
+import kotlinx.coroutines.CoroutineScope
 import org.koin.dsl.module
 
 val interactorModule = module {

@@ -9,5 +9,4 @@ enum class ResponseType {
 
 open class Response() {
     var responseType = ResponseType.UNKNOWN
-
 }
