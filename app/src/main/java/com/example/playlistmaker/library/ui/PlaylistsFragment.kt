@@ -26,9 +26,6 @@ class PlaylistsFragment: Fragment() {
         viewModel.observeState().observe(viewLifecycleOwner) {
             render(it)
         }
-
-        viewModel.setState(PlaylistsState.Empty) // заглушка
-
         return binding.root
     }
     override fun onDestroyView() {

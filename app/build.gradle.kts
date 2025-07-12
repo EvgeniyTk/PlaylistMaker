@@ -71,4 +71,7 @@ dependencies {
     implementation (libs.androidx.navigation.ui.ktx)
     implementation (libs.androidx.fragment.ktx.v156)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
 }

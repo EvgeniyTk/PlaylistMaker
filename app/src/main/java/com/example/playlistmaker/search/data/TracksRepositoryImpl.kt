@@ -1,5 +1,6 @@
 package com.example.playlistmaker.search.data
 
+import com.example.playlistmaker.db.data.AppDatabase
 import com.example.playlistmaker.search.data.dto.ResponseType
 import com.example.playlistmaker.search.data.dto.TrackSearchRequest
 import com.example.playlistmaker.search.data.dto.TrackSearchResponse
@@ -9,15 +10,20 @@ import com.example.playlistmaker.search.domain.models.TracksResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class TracksRepositoryImpl(private val networkClient: NetworkClient): TracksRepository {
+class TracksRepositoryImpl(
+    private val networkClient: NetworkClient,
+    private val appDatabase: AppDatabase
+) : TracksRepository {
     override fun searchTracks(expression: String): Flow<TracksResponse> = flow {
         val response = networkClient.doRequest(TrackSearchRequest(expression))
 
         when (response.responseType) {
             ResponseType.SUCCESS -> {
+                val favoriteTracksIds = appDatabase.trackDao().getTracksId()
                 val trackList = (response as TrackSearchResponse).results.map {
-                    TrackMapper.map(it)
+                    TrackMapper.map(it, favoriteTracksIds.contains(it.trackId))
                 }
+
                 emit(TracksResponse(trackList, ResponseType.SUCCESS))
             }
 

@@ -102,13 +102,13 @@ class SearchViewModel(
         if (isInputFocused == hasFocus) return
 
         isInputFocused = hasFocus
-        updateHistory()
-        if (lastSearchResult.isNotEmpty() && searchTextValue.isNotEmpty()) {
-            renderState(TracksState.Content(lastSearchResult))
-            return
-        }
-        if (hasFocus && trackListHistory.isNotEmpty() && searchTextValue.isEmpty()) {
-            renderState(TracksState.History(trackListHistory))
+        if (hasFocus && searchTextValue.isEmpty()) {
+            updateHistory()
+        } else {
+
+            if (lastSearchResult.isNotEmpty()) {
+                renderState(TracksState.Content(lastSearchResult))
+            }
         }
     }
 
@@ -172,14 +172,11 @@ class SearchViewModel(
     }
 
     fun updateHistory() {
-        getSearchHistoryInteractor.getSavedHistory(
-            object : SearchHistoryInteractor.SearchHistoryConsumer {
-                override fun consume(trackList: List<Track>) {
-                    trackListHistory = trackList.toMutableList()
-                    renderState(TracksState.History(trackListHistory))
-                }
-            }
-        )
+        viewModelScope.launch {
+            val trackList = getSearchHistoryInteractor.getSavedHistory()
+            trackListHistory = trackList.toMutableList()
+            renderState(TracksState.History(trackListHistory))
+        }
     }
 
     private val _openTrackEvent = SingleLiveEvent<Track>()
@@ -187,13 +184,16 @@ class SearchViewModel(
 
     fun setTrack(track: Track) {
         if (clickDebounce()) {
-            getSearchHistoryInteractor.addTrackToHistory(track)
-            _openTrackEvent.postValue(track)
-            if (trackListHistory.contains(track)) {
-                if (searchTextValue.isEmpty()) {
-                    updateHistory()
+            viewModelScope.launch {
+                getSearchHistoryInteractor.addTrackToHistory(track)
+                _openTrackEvent.postValue(track)
+                if (trackListHistory.contains(track)) {
+                    if (searchTextValue.isEmpty()) {
+                        updateHistory()
+                    }
                 }
             }
+
         }
     }
 

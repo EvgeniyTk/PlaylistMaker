@@ -11,12 +11,11 @@ class SearchHistoryInteractorImpl(private val repository: SearchHistoryRepositor
         const val HISTORY_SIZE = 10
     }
 
-    override fun getSavedHistory(consumer: SearchHistoryInteractor.SearchHistoryConsumer) {
-        val history = repository.getSavedHistoryList()
-        consumer.consume(history)
+    override suspend fun getSavedHistory(): List<Track> {
+        return repository.getSavedHistoryList()
     }
 
-    override fun addTrackToHistory(track: Track) {
+    override suspend fun addTrackToHistory(track: Track) {
         val trackList = repository.getSavedHistoryList().toMutableList()
         if (getIndexOfTrack(track.trackId, trackList) != null){
             trackList.remove(track)
@@ -43,7 +42,5 @@ class SearchHistoryInteractorImpl(private val repository: SearchHistoryRepositor
         }
         return null
     }
-
-
 
 }
