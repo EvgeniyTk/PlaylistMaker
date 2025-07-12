@@ -1,7 +1,6 @@
 package com.example.playlistmaker.search.data
 
 import android.content.SharedPreferences
-import com.example.playlistmaker.db.data.AppDatabase
 import com.example.playlistmaker.search.domain.api.SearchHistoryRepository
 import com.example.playlistmaker.search.domain.models.Track
 import com.google.gson.Gson
@@ -9,8 +8,7 @@ import androidx.core.content.edit
 
 class SearchHistoryRepositoryImpl(
     private val sharedPref: SharedPreferences,
-    private val gson: Gson,
-    private val appDatabase: AppDatabase
+    private val gson: Gson
 ): SearchHistoryRepository {
 
     companion object {
@@ -25,10 +23,7 @@ class SearchHistoryRepositoryImpl(
                 addAll(gson.fromJson(str, Array<Track>::class.java))
             }
         }
-        val favoriteIds = appDatabase.trackDao().getTracksId()
-        return trackList.map {
-            it.copy(isFavorite = favoriteIds.contains(it.trackId))
-        }
+        return trackList
     }
 
     override fun saveTrackListToHistory(trackList: List<Track>) {

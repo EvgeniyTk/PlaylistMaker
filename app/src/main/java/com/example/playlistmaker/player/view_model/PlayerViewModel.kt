@@ -72,7 +72,9 @@ class PlayerViewModel(
     fun setTrack(newTrack: Track) {
         if (track == null) {
             track = newTrack
-            _isFavorite.value = newTrack.isFavorite
+            viewModelScope.launch {
+                _isFavorite.value = favoritesInteractor.isFavorite(newTrack)
+            }
             setUrl(newTrack.previewUrl)
         }
     }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.MediaPlayer
 import androidx.room.Room
 import com.example.playlistmaker.db.data.AppDatabase
+import com.example.playlistmaker.db.data.dao.TrackDao
 import com.example.playlistmaker.search.data.NetworkClient
 import com.example.playlistmaker.search.data.SearchHistoryRepositoryImpl
 import com.example.playlistmaker.search.data.network.ITunesApi
@@ -38,7 +39,7 @@ val dataModule = module {
     factory { Gson() }
 
     factory<SearchHistoryRepository> {
-        SearchHistoryRepositoryImpl(get(),get(), get())
+        SearchHistoryRepositoryImpl(get(),get())
     }
 
     single<NetworkClient>{
@@ -56,6 +57,10 @@ val dataModule = module {
     single {
         Room.databaseBuilder(androidContext(), AppDatabase::class.java, "database.db")
             .build()
+    }
+
+    single<TrackDao> {
+        get<AppDatabase>().trackDao()
     }
 
 }
