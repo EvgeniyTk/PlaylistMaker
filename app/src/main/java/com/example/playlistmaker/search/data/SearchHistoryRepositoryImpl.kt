@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import com.example.playlistmaker.search.domain.api.SearchHistoryRepository
 import com.example.playlistmaker.search.domain.models.Track
 import com.google.gson.Gson
+import androidx.core.content.edit
 
 class SearchHistoryRepositoryImpl(
     private val sharedPref: SharedPreferences,
@@ -12,10 +13,9 @@ class SearchHistoryRepositoryImpl(
 
     companion object {
         const val HISTORY_LIST = "history_list"
-
     }
 
-    override fun getSavedHistoryList(): List<Track> {
+    override suspend fun getSavedHistoryList(): List<Track> {
         val str = sharedPref.getString(HISTORY_LIST, null)
         var trackList = mutableListOf<Track>()
         if (str != null) {
@@ -28,8 +28,8 @@ class SearchHistoryRepositoryImpl(
 
     override fun saveTrackListToHistory(trackList: List<Track>) {
         val str = gson.toJson(trackList)
-        sharedPref.edit()
-            .putString(HISTORY_LIST, str)
-            .apply()
+        sharedPref.edit {
+            putString(HISTORY_LIST, str)
+        }
     }
 }

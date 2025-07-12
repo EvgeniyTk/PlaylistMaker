@@ -60,6 +60,14 @@ class PlayerFragment : Fragment() {
             }
         }
 
+        viewModel.isFavorite.observe(viewLifecycleOwner) {
+            if (it) {
+                binding.favouritesButton.setImageResource(R.drawable.favorite_true)
+            } else {
+                binding.favouritesButton.setImageResource(R.drawable.favorite_false)
+            }
+        }
+
         val track: Track? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requireArguments().getParcelable(ARGS_TRACK, Track::class.java)
         } else {
@@ -79,6 +87,10 @@ class PlayerFragment : Fragment() {
 
         binding.toolbarPlayer.setNavigationOnClickListener {
             findNavController().navigateUp()
+        }
+
+        binding.favouritesButton.setOnClickListener{
+            viewModel.onFavoriteClicked()
         }
 
 
