@@ -17,7 +17,7 @@ val viewModelModule = module {
         SettingsViewModel(get(), get())
     }
     viewModel{
-        PlayerViewModel(get(), get())
+        PlayerViewModel(get(), get(), get())
     }
     viewModel{
         FavoriteTracksViewModel(get())
