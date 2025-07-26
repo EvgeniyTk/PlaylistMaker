@@ -18,8 +18,8 @@ class PlaylistsInteractorImpl(
         return playlistsRepository.addPlaylists(playlist)
     }
 
-    override suspend fun updatePlaylist(track: Track, playlist: Playlist) {
-        return playlistsRepository.updatePlaylist(track, playlist)
+    override suspend fun updatePlaylist(track: Track, playlistId: Int) {
+        return playlistsRepository.updatePlaylist(track, playlistId)
     }
 
     override suspend fun saveImageToPrivateStorage(

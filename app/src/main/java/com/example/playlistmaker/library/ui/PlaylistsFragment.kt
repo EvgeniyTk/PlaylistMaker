@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -14,7 +15,7 @@ import com.example.playlistmaker.library.ui.models.PlaylistsState
 import com.example.playlistmaker.library.view_model.PlaylistsViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class PlaylistsFragment: Fragment() {
+class PlaylistsFragment : Fragment() {
 
     private lateinit var adapter: PlaylistAdapter
 
@@ -52,11 +53,11 @@ class PlaylistsFragment: Fragment() {
         _binding = null
     }
 
-    private fun showPlaceholder(){
-        binding.newPlaylistButton.visibility = View.VISIBLE
-        binding.playlistsPlaceholderIV.visibility = View.VISIBLE
-        binding.playlistsPlaceholderTV.visibility = View.VISIBLE
-        binding.playlistsRv.visibility = View.GONE
+    private fun showPlaceholder() {
+        binding.newPlaylistButton.isVisible = true
+        binding.playlistsPlaceholderIV.isVisible = true
+        binding.playlistsPlaceholderTV.isVisible = true
+        binding.playlistsRv.isVisible = false
     }
 
     private fun render(state: PlaylistsState) {
@@ -67,18 +68,18 @@ class PlaylistsFragment: Fragment() {
     }
 
     private fun showContent(list: List<Playlist>) {
-        binding.newPlaylistButton.visibility = View.VISIBLE
-        binding.playlistsPlaceholderIV.visibility = View.GONE
-        binding.playlistsPlaceholderTV.visibility = View.GONE
+        binding.newPlaylistButton.isVisible = true
+        binding.playlistsPlaceholderIV.isVisible = false
+        binding.playlistsPlaceholderTV.isVisible = false
         showPlaylists(list)
     }
 
     private fun showPlaylists(list: List<Playlist>) {
         adapter.updateData(list)
-        binding.playlistsRv.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
+        binding.playlistsRv.isVisible = list.isNotEmpty()
     }
 
-    companion object{
+    companion object {
         fun newInstance(): PlaylistsFragment {
             return PlaylistsFragment()
         }

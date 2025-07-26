@@ -45,7 +45,7 @@ class PlayerViewModel(
             return
         } else {
             viewModelScope.launch {
-                playlistInteractor.updatePlaylist(currentTrack, playlist)
+                playlistInteractor.updatePlaylist(currentTrack, playlist.playlistId)
                 _addTrackStatus.value = AddTrackStatus.Success(playlist.playlistName)
             }
         }

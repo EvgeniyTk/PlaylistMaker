@@ -102,7 +102,7 @@ class NewPlaylistFragment : Fragment() {
 
         textInputEditTextName.doAfterTextChanged {
             updateColors(textInputLayoutName, textInputEditTextName)
-            binding.newPlaylistBtn.isEnabled = !binding.newPlaylistNameEt.text.isNullOrEmpty()
+            binding.newPlaylistBtn.isEnabled = !binding.newPlaylistNameEt.text.isNullOrBlank()
         }
 
         textInputEditTextDescription.setOnFocusChangeListener { _, _ ->

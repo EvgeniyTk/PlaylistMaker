@@ -26,7 +26,7 @@ class PlaylistsRepositoryImpl(
     private val trackInPlaylistDao: TrackInPlaylistDao,
     private val playlistTrackDbConverter: PlaylistTrackDbConverter,
     private val context: Context
-): PlaylistsRepository {
+) : PlaylistsRepository {
     override fun getPlaylists(): Flow<List<Playlist>> =
         playlistDao.getPlaylists()
             .map { convertFromPlaylistEntity(it) }
@@ -39,13 +39,14 @@ class PlaylistsRepositoryImpl(
     override suspend fun saveImageToPrivateStorage(
         uri: Uri,
         playlistName: String
-    ): String = withContext(Dispatchers.IO)  {
+    ): String = withContext(Dispatchers.IO) {
         val filePath =
             File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), playlistName)
         if (!filePath.exists()) {
             filePath.mkdirs()
         }
-        val file = File(filePath, "$playlistName.jpg")
+        val uniqueSuffix = System.currentTimeMillis()
+        val file = File(filePath, "$playlistName-$uniqueSuffix.jpg")
         context.contentResolver.openInputStream(uri).use { inputStream ->
             FileOutputStream(file).use { outputStream ->
                 BitmapFactory
@@ -56,22 +57,26 @@ class PlaylistsRepositoryImpl(
         file.absolutePath
     }
 
-    override suspend fun updatePlaylist(track: Track, playlist: Playlist) {
-        val updatedTrackIdList = playlist.trackIdList.toMutableList().apply { add(track.trackId) }
-        val updatedTracksCount = playlist.tracksCount + 1
+    override suspend fun updatePlaylist(track: Track, playlistId: Int) {
+        val playlistEntity = playlistDao.getPlaylistById(playlistId)
+        val playlist = playlistEntity?.let { playlistDbConverter.map(it) }
 
-        val playlistTrackEntity = playlistTrackDbConverter.map(track)
-        trackInPlaylistDao.insertTrackInPlaylist(playlistTrackEntity)
-
-        val updatedPlaylist = playlist.copy(
-            trackIdList = updatedTrackIdList,
-            tracksCount = updatedTracksCount
-        )
-        val updatedPlaylistEntity = playlistDbConverter.map(updatedPlaylist)
-        playlistDao.updatePlaylist(updatedPlaylistEntity)
+        if (playlist != null) {
+            val updatedTrackIdList =
+                playlist.trackIdList.toMutableList().apply { add(track.trackId) }
+            val updatedTracksCount = playlist.tracksCount + 1
+            val playlistTrackEntity = playlistTrackDbConverter.map(track)
+            trackInPlaylistDao.insertTrackInPlaylist(playlistTrackEntity)
+            val updatedPlaylist = playlist.copy(
+                trackIdList = updatedTrackIdList,
+                tracksCount = updatedTracksCount
+            )
+            val updatedPlaylistEntity = playlistDbConverter.map(updatedPlaylist)
+            playlistDao.updatePlaylist(updatedPlaylistEntity)
+        }
     }
 
     private fun convertFromPlaylistEntity(playlists: List<PlaylistEntity>): List<Playlist> {
-        return playlists.map{ playlistDbConverter.map(it) }
+        return playlists.map { playlistDbConverter.map(it) }
     }
 }

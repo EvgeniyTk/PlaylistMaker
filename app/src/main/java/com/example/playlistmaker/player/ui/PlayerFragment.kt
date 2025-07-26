@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -75,15 +76,15 @@ class PlayerFragment : Fragment() {
         bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    scrim.visibility = View.GONE
+                    scrim.isVisible = false
                 } else {
-                    scrim.visibility = View.VISIBLE
+                    scrim.isVisible = true
                 }
 
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                scrim.visibility = View.VISIBLE
+                scrim.isVisible = true
                 scrim.alpha = slideOffset + 0.5f
             }
 
@@ -168,7 +169,7 @@ class PlayerFragment : Fragment() {
 
     private fun showPlaylists(list: List<Playlist>) {
         adapter.updateData(list)
-        binding.playerRv.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
+        binding.playerRv.isVisible = list.isNotEmpty()
     }
 
     private fun bindTrack(track: Track) {
@@ -184,7 +185,7 @@ class PlayerFragment : Fragment() {
             .format(track.trackTimeMillis)
 
         if (track.collectionName.isEmpty()) {
-            binding.infoGroup.visibility = View.GONE
+            binding.infoGroup.isVisible = false
         } else {
             binding.collectionValue.text = track.collectionName
         }

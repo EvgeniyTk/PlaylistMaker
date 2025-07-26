@@ -1,7 +1,8 @@
 package com.example.playlistmaker.player.ui
 
-import android.net.Uri
+
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.PlaylistInPlayerViewBinding
 import com.example.playlistmaker.library.domain.model.Playlist
@@ -11,17 +12,13 @@ class PlaylistInPlayerViewHolder(
     private val binding: PlaylistInPlayerViewBinding
 ): RecyclerView.ViewHolder(binding.root) {
     fun bind(model: Playlist) {
-        val imagePath = model.imagePath
-        if (!imagePath.isNullOrEmpty()) {
-            val imageFile = File(imagePath)
-            if (imageFile.exists()) {
-                binding.playlistInPlayerIv.setImageURI(Uri.fromFile(imageFile))
-            } else {
-                binding.playlistInPlayerIv.setImageResource(R.drawable.track_placeholder)
-            }
-        } else {
-            binding.playlistInPlayerIv.setImageResource(R.drawable.track_placeholder)
-        }
+        val imageFile = model.imagePath?.let { File(it) }
+        Glide.with(binding.playlistInPlayerIv.context)
+            .load(if (imageFile?.exists() == true) imageFile else null)
+            .placeholder(R.drawable.track_placeholder)
+            .error(R.drawable.track_placeholder)
+            .into(binding.playlistInPlayerIv)
+
         binding.playlistInPlayerNameTv.text = model.playlistName
         binding.playlistInPlayerCountTv.text = getWordForm(model.tracksCount)
     }

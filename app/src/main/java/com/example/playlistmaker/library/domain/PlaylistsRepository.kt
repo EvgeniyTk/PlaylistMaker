@@ -9,5 +9,5 @@ interface PlaylistsRepository {
     fun getPlaylists(): Flow<List<Playlist>>
     suspend fun addPlaylists(playlist: Playlist)
     suspend fun saveImageToPrivateStorage(uri: Uri, playlistName: String): String
-    suspend fun updatePlaylist(track: Track, playlist: Playlist)
+    suspend fun updatePlaylist(track: Track, playlistId: Int)
 }
