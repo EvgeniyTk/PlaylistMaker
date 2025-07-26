@@ -1,4 +1,4 @@
-package com.example.playlistmaker.library.ui
+package com.example.playlistmaker.player.ui
 
 import android.net.Uri
 import androidx.recyclerview.widget.RecyclerView
@@ -27,15 +27,6 @@ class PlaylistInPlayerViewHolder(
     }
 
     private fun getWordForm(count: Int): String{
-        val n = count % 100
-        return if (n in 11..19) {
-            "$count треков"
-        } else {
-            when (n % 10) {
-                1 -> "$count трек"
-                2, 3, 4 -> "$count трека"
-                else -> "$count треков"
-            }
-        }
+        return binding.root.context.resources.getQuantityString(R.plurals.track_count, count, count)
     }
 }

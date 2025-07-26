@@ -4,6 +4,7 @@ import android.net.Uri
 import com.example.playlistmaker.library.domain.PlaylistsInteractor
 import com.example.playlistmaker.library.domain.PlaylistsRepository
 import com.example.playlistmaker.library.domain.model.Playlist
+import com.example.playlistmaker.search.domain.models.Track
 import kotlinx.coroutines.flow.Flow
 
 class PlaylistsInteractorImpl(
@@ -17,8 +18,8 @@ class PlaylistsInteractorImpl(
         return playlistsRepository.addPlaylists(playlist)
     }
 
-    override suspend fun updatePlaylist(playlist: Playlist) {
-        return playlistsRepository.updatePlaylist(playlist)
+    override suspend fun updatePlaylist(track: Track, playlist: Playlist) {
+        return playlistsRepository.updatePlaylist(track, playlist)
     }
 
     override suspend fun saveImageToPrivateStorage(
@@ -27,4 +28,6 @@ class PlaylistsInteractorImpl(
     ): String {
         return playlistsRepository.saveImageToPrivateStorage(uri, playlistName)
     }
+
+
 }

@@ -11,6 +11,8 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -48,6 +50,12 @@ class NewPlaylistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        ViewCompat.setOnApplyWindowInsetsListener(binding.newPlaylist) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            insets
+        }
+
         viewModel.selectedUri.observe(viewLifecycleOwner) {
             if (it != null) {
                 binding.newPlaylistIv.setImageURI(it)
@@ -55,17 +63,18 @@ class NewPlaylistFragment : Fragment() {
         }
 
         viewModel.saveCompleted.observe(viewLifecycleOwner) {
-                Toast.makeText(requireContext(), "Плейлист ${it} создан", Toast.LENGTH_SHORT)
+                Toast.makeText(requireContext(),
+                    getString(R.string.playlist_created, it), Toast.LENGTH_SHORT)
                     .show()
                 findNavController().navigateUp()
         }
 
 
         confirmDialog = MaterialAlertDialogBuilder(requireContext(), R.style.CustomAlertDialogTheme)
-            .setTitle("Завершить создание плейлиста?")
-            .setMessage("Все несохраненные данные будут потеряны")
-            .setNeutralButton("Отмена") { dialog, which -> }
-            .setPositiveButton("Завершить") { dialog, which ->
+            .setTitle(getString(R.string.confirm_playlist_creation_title))
+            .setMessage(getString(R.string.confirm_playlist_creation_message))
+            .setNeutralButton(getString(R.string.cansel)) { dialog, which -> }
+            .setPositiveButton(getString(R.string.finish)) { dialog, which ->
                 findNavController().navigateUp()
             }
 

@@ -1,4 +1,4 @@
-package com.example.playlistmaker.library.ui
+package com.example.playlistmaker.player.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlistmaker.databinding.PlaylistInPlayerViewBinding
 import com.example.playlistmaker.library.domain.model.Playlist
 
-class PlaylistInPlayerAdapter: RecyclerView.Adapter<PlaylistInPlayerViewHolder>() {
+class PlaylistInPlayerAdapter(private val clickListener: PlaylistClickListener): RecyclerView.Adapter<PlaylistInPlayerViewHolder>() {
     private var list:MutableList<Playlist> = mutableListOf()
 
     fun updateData(newList: List<Playlist>) {
@@ -25,5 +25,12 @@ class PlaylistInPlayerAdapter: RecyclerView.Adapter<PlaylistInPlayerViewHolder>(
 
     override fun onBindViewHolder(holder: PlaylistInPlayerViewHolder, position: Int) {
         holder.bind(list[position])
+        holder.itemView.setOnClickListener{
+            clickListener.onPlaylistClick(list[position])
+        }
+    }
+
+    fun interface PlaylistClickListener {
+        fun onPlaylistClick(playlist: Playlist)
     }
 }

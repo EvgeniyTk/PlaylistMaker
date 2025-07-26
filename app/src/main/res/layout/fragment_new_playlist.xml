@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/new_playlist"
     tools:context=".library.ui.NewPlaylistFragment">
 
     <androidx.appcompat.widget.Toolbar
@@ -64,6 +65,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="?attr/textColorSecondary"
+            android:imeOptions="actionDone"
+            android:inputType="text"
             android:maxLines="1"/>
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -84,6 +87,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:textColor="?attr/textColorSecondary"
+            android:imeOptions="actionDone"
+            android:inputType="text"
             android:maxLines="1"/>
 
     </com.google.android.material.textfield.TextInputLayout>
