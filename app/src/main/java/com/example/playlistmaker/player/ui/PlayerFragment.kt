@@ -1,21 +1,30 @@
 package com.example.playlistmaker.player.ui
 
+
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentPlayerBinding
+import com.example.playlistmaker.library.domain.model.Playlist
+import com.example.playlistmaker.player.model.AddTrackStatus
 import com.example.playlistmaker.player.model.PlayerState
 import com.example.playlistmaker.player.view_model.PlayerViewModel
 import com.example.playlistmaker.search.domain.models.Track
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -25,6 +34,7 @@ class PlayerFragment : Fragment() {
 
     private var _binding: FragmentPlayerBinding? = null
     private val binding get() = _binding!!
+    private lateinit var adapter: PlaylistInPlayerAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,6 +47,48 @@ class PlayerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            insets
+        }
+
+        adapter = PlaylistInPlayerAdapter { viewModel.addTrackToPlaylist(it) }
+        binding.playerRv.layoutManager = LinearLayoutManager(requireContext())
+        binding.playerRv.adapter = adapter
+
+        val bottomSheetContainer = binding.standardBottomSheet
+        val scrim = binding.bottomSheetScrim
+        val bottomSheetBehavior =  BottomSheetBehavior.from(bottomSheetContainer).apply {
+            state = BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        binding.playlistButton.setOnClickListener {
+            viewModel.onPlaylistButtonClicked()
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+
+        binding.addPlaylistInPlayerButton.setOnClickListener{
+            findNavController().navigate(R.id.action_playerFragment_to_newPlaylistFragment)
+        }
+
+        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                    scrim.isVisible = false
+                } else {
+                    scrim.isVisible = true
+                }
+
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                scrim.isVisible = true
+                scrim.alpha = slideOffset + 0.5f
+            }
+
+        })
 
 
         viewModel.playerUiState.observe(viewLifecycleOwner) { state ->
@@ -68,6 +120,25 @@ class PlayerFragment : Fragment() {
             }
         }
 
+        viewModel.playlists.observe(viewLifecycleOwner){
+            showPlaylists(it)
+        }
+
+        viewModel.addTrackStatus.observe(viewLifecycleOwner) { status ->
+            when(status) {
+                is AddTrackStatus.Success -> {
+                    Toast.makeText(requireContext(),
+                        getString(R.string.added_track_in_playlist, status.playlistName), Toast.LENGTH_SHORT)
+                        .show()
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                }
+                is AddTrackStatus.AlreadyAdded -> {
+                    Toast.makeText(context,
+                        getString(R.string.track_already_added, status.playlistName), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         val track: Track? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requireArguments().getParcelable(ARGS_TRACK, Track::class.java)
         } else {
@@ -96,6 +167,11 @@ class PlayerFragment : Fragment() {
 
     }
 
+    private fun showPlaylists(list: List<Playlist>) {
+        adapter.updateData(list)
+        binding.playerRv.isVisible = list.isNotEmpty()
+    }
+
     private fun bindTrack(track: Track) {
         Glide.with(requireContext())
             .load(track.getCoverArtwork())
@@ -109,7 +185,7 @@ class PlayerFragment : Fragment() {
             .format(track.trackTimeMillis)
 
         if (track.collectionName.isEmpty()) {
-            binding.infoGroup.visibility = View.GONE
+            binding.infoGroup.isVisible = false
         } else {
             binding.collectionValue.text = track.collectionName
         }
