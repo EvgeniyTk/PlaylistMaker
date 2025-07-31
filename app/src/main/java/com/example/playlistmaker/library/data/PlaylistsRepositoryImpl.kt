@@ -61,19 +61,20 @@ class PlaylistsRepositoryImpl(
         val playlistEntity = playlistDao.getPlaylistById(playlistId)
         val playlist = playlistEntity?.let { playlistDbConverter.map(it) }
 
-        if (playlist != null) {
-            val updatedTrackIdList =
-                playlist.trackIdList.toMutableList().apply { add(track.trackId) }
-            val updatedTracksCount = playlist.tracksCount + 1
-            val playlistTrackEntity = playlistTrackDbConverter.map(track)
-            trackInPlaylistDao.insertTrackInPlaylist(playlistTrackEntity)
-            val updatedPlaylist = playlist.copy(
-                trackIdList = updatedTrackIdList,
-                tracksCount = updatedTracksCount
-            )
-            val updatedPlaylistEntity = playlistDbConverter.map(updatedPlaylist)
-            playlistDao.updatePlaylist(updatedPlaylistEntity)
-        }
+        if (playlist == null) return
+
+        val updatedTrackIdList =
+            playlist.trackIdList.toMutableList().apply { add(track.trackId) }
+        val updatedTracksCount = playlist.tracksCount + 1
+        val playlistTrackEntity = playlistTrackDbConverter.map(track)
+        trackInPlaylistDao.insertTrackInPlaylist(playlistTrackEntity)
+        val updatedPlaylist = playlist.copy(
+            trackIdList = updatedTrackIdList,
+            tracksCount = updatedTracksCount
+        )
+        val updatedPlaylistEntity = playlistDbConverter.map(updatedPlaylist)
+        playlistDao.updatePlaylist(updatedPlaylistEntity)
+
     }
 
     private fun convertFromPlaylistEntity(playlists: List<PlaylistEntity>): List<Playlist> {
