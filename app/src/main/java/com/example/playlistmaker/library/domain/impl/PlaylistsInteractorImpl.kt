@@ -29,5 +29,12 @@ class PlaylistsInteractorImpl(
         return playlistsRepository.saveImageToPrivateStorage(uri, playlistName)
     }
 
+    override fun getTracksByIds(ids: List<Int>): Flow<List<Track>> {
+        return playlistsRepository.getTracksByIds(ids)
+    }
+
+    override suspend fun getPlaylistById(id: Int): Playlist? {
+        return playlistsRepository.getPlaylistById(id)
+    }
 
 }

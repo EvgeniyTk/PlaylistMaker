@@ -77,6 +77,17 @@ class PlaylistsRepositoryImpl(
 
     }
 
+    override suspend fun getPlaylistById(id: Int): Playlist? {
+        val playlistEntity = playlistDao.getPlaylistById(id)
+        val playlist = playlistEntity?.let { playlistDbConverter.map(it) }
+        return playlist
+    }
+
+    override fun getTracksByIds(trackIds: List<Int>): Flow<List<Track>> {
+        return trackInPlaylistDao.getTracksByIds(trackIds)
+            .map { list -> list.map {playlistTrackDbConverter.map(it)}}
+    }
+
     private fun convertFromPlaylistEntity(playlists: List<PlaylistEntity>): List<Playlist> {
         return playlists.map { playlistDbConverter.map(it) }
     }

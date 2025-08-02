@@ -15,6 +15,23 @@ class PlaylistTrackDbConverter {
             track.releaseDate,
             track.primaryGenreName,
             track.country,
+            track.isFavorite,
+            track.previewUrl
+        )
+    }
+
+    fun map(track: PlaylistTrackEntity): Track {
+        return Track(
+            track.trackId,
+            track.trackName,
+            track.artistName,
+            track.trackTimeMillis,
+            track.artworkUrl100,
+            track.collectionName,
+            track.releaseDate,
+            track.primaryGenreName,
+            track.country,
+            track.isFavorite,
             track.previewUrl
         )
     }
