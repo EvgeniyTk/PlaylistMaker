@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import com.example.playlistmaker.db.data.converters.PlaylistDbConverter
 import com.example.playlistmaker.db.data.converters.PlaylistTrackDbConverter
 import com.example.playlistmaker.db.data.dao.PlaylistDao
@@ -15,6 +16,7 @@ import com.example.playlistmaker.library.domain.model.Playlist
 import com.example.playlistmaker.search.domain.models.Track
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -74,7 +76,41 @@ class PlaylistsRepositoryImpl(
         )
         val updatedPlaylistEntity = playlistDbConverter.map(updatedPlaylist)
         playlistDao.updatePlaylist(updatedPlaylistEntity)
+    }
 
+    override suspend fun deleteTrackFromPlaylist(trackId: Int, playlistId: Int) {
+        val playlistEntity = playlistDao.getPlaylistById(playlistId)
+        val playlist = playlistEntity?.let { playlistDbConverter.map(playlistEntity) }
+        if (playlist == null) return
+        val updatedTrackIdList = playlist.trackIdList.toMutableList().apply { remove(trackId) }
+        val updatedTracksCount = playlist.tracksCount - 1
+        val updatedPlaylist = playlist.copy(
+            trackIdList = updatedTrackIdList,
+            tracksCount = updatedTracksCount
+        )
+        playlistDao.updatePlaylist(playlistDbConverter.map(updatedPlaylist))
+
+        deleteTrackIfUnused(trackId, playlistId)
+    }
+
+    override suspend fun deletePlaylist(playlistId: Int) {
+        try {
+            val playlistEntity = playlistDao.getPlaylistById(playlistId) ?: return
+            val playlist = playlistDbConverter.map(playlistEntity)
+            val trackIds = playlist.trackIdList
+            playlist.imagePath?.let { imagePath ->
+                val imageFile = File(imagePath)
+                if (imageFile.exists()) {
+                    imageFile.delete()
+                }
+            }
+            playlistDao.deletePlaylist(playlistId)
+            trackIds.forEach { trackId ->
+                deleteTrackIfUnused(trackId, playlistId)
+            }
+        } catch (e: Exception) {
+            Log.e("DELETE_ERROR", "Failed to delete playlist $playlistId", e)
+        }
     }
 
     override suspend fun getPlaylistById(id: Int): Playlist? {
@@ -83,9 +119,22 @@ class PlaylistsRepositoryImpl(
         return playlist
     }
 
-    override fun getTracksByIds(trackIds: List<Int>): Flow<List<Track>> {
-        return trackInPlaylistDao.getTracksByIds(trackIds)
-            .map { list -> list.map {playlistTrackDbConverter.map(it)}}
+    override suspend fun getTracksByIds(trackIds: List<Int>): List<Track> {
+        return trackInPlaylistDao.getTracksByIds(trackIds).map {
+            playlistTrackDbConverter.map(it)
+        }
+    }
+
+    private suspend fun deleteTrackIfUnused(trackId: Int, playlistId: Int) {
+        val allPlaylists = playlistDao.getPlaylists().first()
+        val isTrackUsed = allPlaylists.any { entity ->
+            val playlist = playlistDbConverter.map(entity)
+            playlist.playlistId != playlistId && playlist.trackIdList.contains(trackId)
+        }
+
+        if (!isTrackUsed) {
+            trackInPlaylistDao.deleteTrackById(trackId)
+        }
     }
 
     private fun convertFromPlaylistEntity(playlists: List<PlaylistEntity>): List<Playlist> {

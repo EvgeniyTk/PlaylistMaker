@@ -101,5 +101,6 @@ class PlaylistsFragment : Fragment() {
         }
         private const val CLICK_DEBOUNCE_DELAY = 330L
         const val KEY = "playlistId"
+
     }
 }
