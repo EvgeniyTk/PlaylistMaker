@@ -134,61 +134,11 @@ class PlaylistFragment : Fragment() {
 
         viewModel.loadPlaylist(playlistId)
 
-        val includedView = binding.playlistView
-
         viewModel.screenState.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is PlaylistScreenState.PlaylistContent -> {
-                    val playlist = state.playlist
-                    val tracks = state.tracks
-                    binding.playlistFragmentNameTv.text = playlist.playlistName
-                    binding.playlistFragmentDescriptionTv.text = playlist.playlistDescription
-                    binding.playlistFragmentCountTracksTv.text =
-                        getWordFormTracks(playlist.tracksCount)
-                    val durationSum = (tracks.sumOf { it.trackTimeMillis } / 60000).toInt()
-                    binding.playlistFragmentTracksDurationTv.text =
-                        getWordFormMinutes(durationSum)
-
-                    val imageFile = playlist.imagePath?.let { File(it) }
-                    Glide.with(binding.playlistFragmentImageIv.context)
-                        .load(if (imageFile?.exists() == true) imageFile else null)
-                        .placeholder(R.drawable.track_placeholder)
-                        .error(R.drawable.track_placeholder)
-                        .listener(object : RequestListener<Drawable> {
-                            override fun onLoadFailed(
-                                e: GlideException?,
-                                model: Any?,
-                                target: Target<Drawable>?,
-                                isFirstResource: Boolean
-                            ) = false
-
-                            override fun onResourceReady(
-                                resource: Drawable?,
-                                model: Any?,
-                                target: Target<Drawable>?,
-                                dataSource: DataSource?,
-                                isFirstResource: Boolean
-                            ): Boolean {
-                                binding.playlistFragmentImageIv.setPadding(0)
-                                return false
-                            }
-
-                        })
-                        .into(binding.playlistFragmentImageIv)
-                    adapter.updateData(tracks)
-
-                    includedView.playlistInPlayerNameTv.text = playlist.playlistName
-                    includedView.playlistInPlayerCountTv.text = getWordFormTracks(playlist.tracksCount)
-                    Glide.with(includedView.playlistInPlayerIv.context)
-                        .load(if (imageFile?.exists() == true) imageFile else null)
-                        .placeholder(R.drawable.track_placeholder)
-                        .error(R.drawable.track_placeholder)
-                        .into(includedView.playlistInPlayerIv)
-                }
-            }
+            render(state)
         }
 
-        viewModel.playlistDeleted.observe(viewLifecycleOwner) {deleted ->
+        viewModel.playlistDeleted.observe(viewLifecycleOwner) { deleted ->
             if (deleted) {
                 findNavController().navigateUp()
             }
@@ -214,14 +164,24 @@ class PlaylistFragment : Fragment() {
         }
 
         binding.editInfoPlaylistBtn.setOnClickListener {
-
+            val bundle = Bundle().apply {
+                putInt(KEY, playlistId)
+            }
+            findNavController().navigate(
+                R.id.action_playlistFragment_to_editPlaylistFragment,
+                bundle
+            )
         }
 
         binding.deletePlaylistBtn.setOnClickListener {
             menuBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-            val state = viewModel.screenState.value
-            if (state is PlaylistScreenState.PlaylistContent) {
-                showDeletePlaylistConfirmationDialog(state.playlist)
+            val playlist = when (val state = viewModel.screenState.value) {
+                is PlaylistScreenState.PlaylistContent -> state.playlist
+                is PlaylistScreenState.PlaylistEmptyTracks -> state.playlist
+                else -> null
+            }
+            playlist?.let {
+                showDeletePlaylistConfirmationDialog(it)
             }
         }
 
@@ -266,18 +226,20 @@ class PlaylistFragment : Fragment() {
 
     private fun sharePlaylist() {
         val state = viewModel.screenState.value
-        if (state is PlaylistScreenState.PlaylistContent) {
-            val playlist = state.playlist
-            val tracks = state.tracks
-            if (tracks.isEmpty()) {
+        when (state) {
+            is PlaylistScreenState.PlaylistContent -> {
+                val playlist = state.playlist
+                val tracks = state.tracks
+                val message = buildShareMessage(playlist, tracks)
+                viewModel.sharePlaylistMessage(message)
+            }
+
+            else -> {
                 Toast.makeText(
                     requireContext(),
                     getString(R.string.no_tracks_to_share),
                     Toast.LENGTH_SHORT
                 ).show()
-            } else {
-                val message = buildShareMessage(playlist, tracks)
-                viewModel.sharePlaylistMessage(message)
             }
         }
     }
@@ -298,6 +260,74 @@ class PlaylistFragment : Fragment() {
             builder.appendLine("${index + 1}. ${track.artistName} - ${track.trackName} ($duration)")
         }
         return builder.toString()
+    }
+
+    private fun render(state: PlaylistScreenState) {
+        when (state) {
+            is PlaylistScreenState.PlaylistEmptyTracks -> {
+                showPlaceholder(true)
+                showPlaylist(state.playlist, emptyList())
+            }
+
+            is PlaylistScreenState.PlaylistContent -> {
+                showPlaceholder(false)
+                showPlaylist(state.playlist, state.tracks)
+            }
+        }
+    }
+
+    private fun showPlaceholder(isVisible: Boolean) {
+        binding.playlistPlaceholderIv.isVisible = isVisible
+        binding.playlistPlaceholderTv.isVisible = isVisible
+        binding.playlistFragmentRv.isVisible = !isVisible
+    }
+
+    private fun showPlaylist(playlist: Playlist, tracks: List<Track>) {
+
+        binding.playlistFragmentNameTv.text = playlist.playlistName
+        binding.playlistFragmentDescriptionTv.text = playlist.playlistDescription
+        binding.playlistFragmentCountTracksTv.text =
+            getWordFormTracks(playlist.tracksCount)
+        val durationSum = (tracks.sumOf { it.trackTimeMillis } / 60000).toInt()
+        binding.playlistFragmentTracksDurationTv.text =
+            getWordFormMinutes(durationSum)
+
+        val imageFile = playlist.imagePath?.let { File(it) }
+        Glide.with(binding.playlistFragmentImageIv.context)
+            .load(if (imageFile?.exists() == true) imageFile else null)
+            .placeholder(R.drawable.track_placeholder)
+            .error(R.drawable.track_placeholder)
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ) = false
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    binding.playlistFragmentImageIv.setPadding(0)
+                    return false
+                }
+
+            })
+            .into(binding.playlistFragmentImageIv)
+        adapter.updateData(tracks)
+        val includedView = binding.playlistView
+        includedView.playlistInPlayerNameTv.text = playlist.playlistName
+        includedView.playlistInPlayerCountTv.text =
+            getWordFormTracks(playlist.tracksCount)
+        Glide.with(includedView.playlistInPlayerIv.context)
+            .load(if (imageFile?.exists() == true) imageFile else null)
+            .placeholder(R.drawable.track_placeholder)
+            .error(R.drawable.track_placeholder)
+            .into(includedView.playlistInPlayerIv)
     }
 
 

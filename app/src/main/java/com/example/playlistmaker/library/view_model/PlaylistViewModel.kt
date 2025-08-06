@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 class PlaylistViewModel(
     private val playlistsInteractor: PlaylistsInteractor,
     private val sharingInteractor: SharingInteractor
-    ) : ViewModel() {
+) : ViewModel() {
     private val _screenState = MutableLiveData<PlaylistScreenState>()
     val screenState: LiveData<PlaylistScreenState> = _screenState
 
@@ -27,7 +27,13 @@ class PlaylistViewModel(
             val playlist = playlistsInteractor.getPlaylistById(id)
             if (playlist != null) {
                 val tracks = playlistsInteractor.getTracksByIds(playlist.trackIdList)
-                _screenState.value = PlaylistScreenState.PlaylistContent(playlist, tracks)
+                    .sortedByDescending { playlist.trackIdList.indexOf(it.trackId) }
+                if (tracks.isNotEmpty()) {
+                    _screenState.value = PlaylistScreenState.PlaylistContent(playlist, tracks)
+                } else {
+                    _screenState.value = PlaylistScreenState.PlaylistEmptyTracks(playlist)
+                }
+
             }
         }
     }
@@ -65,7 +71,6 @@ class PlaylistViewModel(
             _playlistDeleted.postValue(true)
         }
     }
-
 
 
     companion object {

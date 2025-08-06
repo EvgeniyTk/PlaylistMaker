@@ -13,6 +13,6 @@ interface PlaylistsRepository {
     suspend fun getPlaylistById(id: Int): Playlist?
     suspend fun getTracksByIds(trackIds: List<Int>): List<Track>
     suspend fun deleteTrackFromPlaylist(trackId: Int, playlistId: Int)
-
     suspend fun deletePlaylist(playlistId: Int)
+    suspend fun updatePlaylist(playlist: Playlist)
 }

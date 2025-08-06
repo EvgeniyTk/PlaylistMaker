@@ -24,11 +24,11 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class NewPlaylistFragment : Fragment() {
+open class NewPlaylistFragment : Fragment() {
 
-    private val viewModel by viewModel<NewPlaylistViewModel>()
+    open val viewModel by viewModel<NewPlaylistViewModel>()
     private var _binding: FragmentNewPlaylistBinding? = null
-    private val binding get() = _binding!!
+    protected val binding get() = _binding!!
 
     private lateinit var textInputLayoutName: TextInputLayout
     private lateinit var textInputEditTextName: TextInputEditText
@@ -63,10 +63,14 @@ class NewPlaylistFragment : Fragment() {
         }
 
         viewModel.saveCompleted.observe(viewLifecycleOwner) {
-                Toast.makeText(requireContext(),
-                    getString(R.string.playlist_created, it), Toast.LENGTH_SHORT)
+            if (this !is EditPlaylistFragment) {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.playlist_created, it), Toast.LENGTH_SHORT
+                )
                     .show()
-                findNavController().navigateUp()
+            }
+            findNavController().navigateUp()
         }
 
 

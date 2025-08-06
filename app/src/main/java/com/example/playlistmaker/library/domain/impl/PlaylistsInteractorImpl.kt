@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 class PlaylistsInteractorImpl(
     private val playlistsRepository: PlaylistsRepository
-): PlaylistsInteractor {
+) : PlaylistsInteractor {
     override fun getPlaylists(): Flow<List<Playlist>> {
         return playlistsRepository.getPlaylists()
     }
@@ -43,6 +43,10 @@ class PlaylistsInteractorImpl(
 
     override suspend fun deletePlaylist(playlistId: Int) {
         return playlistsRepository.deletePlaylist(playlistId)
+    }
+
+    override suspend fun updatePlaylist(playlist: Playlist) {
+        return playlistsRepository.updatePlaylist(playlist)
     }
 
 }

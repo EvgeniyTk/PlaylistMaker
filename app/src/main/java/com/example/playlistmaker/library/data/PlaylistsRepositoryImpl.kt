@@ -113,6 +113,11 @@ class PlaylistsRepositoryImpl(
         }
     }
 
+    override suspend fun updatePlaylist(playlist: Playlist) {
+        val entity = playlistDbConverter.map(playlist)
+        playlistDao.updatePlaylist(entity)
+    }
+
     override suspend fun getPlaylistById(id: Int): Playlist? {
         val playlistEntity = playlistDao.getPlaylistById(id)
         val playlist = playlistEntity?.let { playlistDbConverter.map(it) }
@@ -136,6 +141,7 @@ class PlaylistsRepositoryImpl(
             trackInPlaylistDao.deleteTrackById(trackId)
         }
     }
+
 
     private fun convertFromPlaylistEntity(playlists: List<PlaylistEntity>): List<Playlist> {
         return playlists.map { playlistDbConverter.map(it) }
