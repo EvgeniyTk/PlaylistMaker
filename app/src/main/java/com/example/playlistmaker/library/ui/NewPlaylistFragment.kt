@@ -24,11 +24,11 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class NewPlaylistFragment : Fragment() {
+open class NewPlaylistFragment : Fragment() {
 
-    private val viewModel by viewModel<NewPlaylistViewModel>()
+    open val viewModel by viewModel<NewPlaylistViewModel>()
     private var _binding: FragmentNewPlaylistBinding? = null
-    private val binding get() = _binding!!
+    protected val binding get() = _binding!!
 
     private lateinit var textInputLayoutName: TextInputLayout
     private lateinit var textInputEditTextName: TextInputEditText
@@ -56,6 +56,27 @@ class NewPlaylistFragment : Fragment() {
             insets
         }
 
+        ViewCompat.setOnApplyWindowInsetsListener(binding.scroll) { v, insets ->
+            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            v.setPadding(
+                systemBars.left,
+                0,
+                systemBars.right,
+                if (imeVisible) imeHeight else systemBars.bottom
+            )
+
+            if (imeVisible) {
+                binding.scroll.post {
+                    binding.scroll.smoothScrollTo(0, binding.newPlaylistDescriptionTil.bottom)
+                }
+            }
+
+            insets
+        }
+
         viewModel.selectedUri.observe(viewLifecycleOwner) {
             if (it != null) {
                 binding.newPlaylistIv.setImageURI(it)
@@ -63,10 +84,14 @@ class NewPlaylistFragment : Fragment() {
         }
 
         viewModel.saveCompleted.observe(viewLifecycleOwner) {
-                Toast.makeText(requireContext(),
-                    getString(R.string.playlist_created, it), Toast.LENGTH_SHORT)
+            if (this !is EditPlaylistFragment) {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.playlist_created, it), Toast.LENGTH_SHORT
+                )
                     .show()
-                findNavController().navigateUp()
+            }
+            findNavController().navigateUp()
         }
 
 

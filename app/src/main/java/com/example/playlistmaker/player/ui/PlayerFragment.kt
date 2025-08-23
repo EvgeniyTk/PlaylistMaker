@@ -69,6 +69,10 @@ class PlayerFragment : Fragment() {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
 
+        scrim.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+
         binding.addPlaylistInPlayerButton.setOnClickListener{
             findNavController().navigate(R.id.action_playerFragment_to_newPlaylistFragment)
         }

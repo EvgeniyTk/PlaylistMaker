@@ -10,4 +10,9 @@ interface PlaylistsInteractor {
     suspend fun addPlaylist(playlist: Playlist)
     suspend fun updatePlaylist(track: Track, playlistId: Int)
     suspend fun saveImageToPrivateStorage(uri: Uri, playlistName: String): String
+    suspend fun getTracksByIds(ids: List<Int>): List<Track>
+    suspend fun getPlaylistById(id: Int): Playlist?
+    suspend fun deleteTrackFromPlaylist(trackId: Int, playlistId: Int)
+    suspend fun deletePlaylist(playlistId: Int)
+    suspend fun updatePlaylist(playlist: Playlist)
 }
