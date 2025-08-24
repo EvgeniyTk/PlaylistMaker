@@ -103,11 +103,11 @@ class PlayerFragment : Fragment() {
                 }
 
                 is PlayerState.Playing -> {
-                    binding.playButton.setImageResource(R.drawable.pause_button)
+                    binding.playButton.setPlaying(true)
                 }
 
                 is PlayerState.Paused -> {
-                    binding.playButton.setImageResource(R.drawable.play_button)
+                    binding.playButton.setPlaying(false)
                 }
 
                 is PlayerState.TimeUpdated -> {
@@ -156,7 +156,7 @@ class PlayerFragment : Fragment() {
             viewModel.setUrl(track.previewUrl)
         }
 
-        binding.playButton.setOnClickListener {
+        binding.playButton.setOnPlaybackClickListener {
             viewModel.playbackControl()
         }
 
