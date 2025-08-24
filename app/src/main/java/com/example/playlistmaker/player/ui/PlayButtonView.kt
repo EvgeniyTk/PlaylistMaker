@@ -105,4 +105,8 @@ class PlayButtonView @JvmOverloads constructor(
     fun setOnPlaybackClickListener(l: () -> Unit) {
         listener = l
     }
+
+    fun removeOnPlaybackClickListener() {
+        listener = null
+    }
 }

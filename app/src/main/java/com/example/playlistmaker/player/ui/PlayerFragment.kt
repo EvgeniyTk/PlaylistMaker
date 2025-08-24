@@ -206,6 +206,7 @@ class PlayerFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.playButton.removeOnPlaybackClickListener()
         _binding = null
     }
 
