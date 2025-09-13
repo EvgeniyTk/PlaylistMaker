@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -37,8 +38,10 @@ class PlayerFragment : Fragment() {
         if (isGranted) {
             // Permission granted
         } else {
-            Toast.makeText(requireContext(),
-                getString(R.string.request_permission), Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.request_permission), Toast.LENGTH_LONG
+            ).show()
         }
     }
 
@@ -60,22 +63,15 @@ class PlayerFragment : Fragment() {
         viewModel.onUiStarted()
     }
 
+
     override fun onStop() {
         super.onStop()
-        val leavingScreen = requireActivity().isFinishing || isRemoving || parentFragment?.isRemoving == true
-        val isConfigChange = requireActivity().isChangingConfigurations
-
-        if (leavingScreen && !isConfigChange) {
-            viewModel.pauseIfNeeded()
-            viewModel.onUiDestroyed()
-        } else {
-            viewModel.onUiStopped()
-        }
+        viewModel.onUiStopped()
     }
 
     private fun hasPostNotificationsPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            androidx.core.content.ContextCompat.checkSelfPermission(
+            ContextCompat.checkSelfPermission(
                 requireContext(),
                 android.Manifest.permission.POST_NOTIFICATIONS
             ) == android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -108,7 +104,7 @@ class PlayerFragment : Fragment() {
 
         val bottomSheetContainer = binding.standardBottomSheet
         val scrim = binding.bottomSheetScrim
-        val bottomSheetBehavior =  BottomSheetBehavior.from(bottomSheetContainer).apply {
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetContainer).apply {
             state = BottomSheetBehavior.STATE_HIDDEN
         }
 
@@ -121,11 +117,12 @@ class PlayerFragment : Fragment() {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
 
-        binding.addPlaylistInPlayerButton.setOnClickListener{
+        binding.addPlaylistInPlayerButton.setOnClickListener {
             findNavController().navigate(R.id.action_playerFragment_to_newPlaylistFragment)
         }
 
-        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        bottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                     scrim.isVisible = false
@@ -170,21 +167,28 @@ class PlayerFragment : Fragment() {
             }
         }
 
-        viewModel.playlists.observe(viewLifecycleOwner){ playlists ->
+        viewModel.playlists.observe(viewLifecycleOwner) { playlists ->
             showPlaylists(playlists)
         }
 
         viewModel.addTrackStatus.observe(viewLifecycleOwner) { status ->
-            when(status) {
+            when (status) {
                 is AddTrackStatus.Success -> {
-                    Toast.makeText(requireContext(),
-                        getString(R.string.added_track_in_playlist, status.playlistName), Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.added_track_in_playlist, status.playlistName),
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                     bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
                 }
+
                 is AddTrackStatus.AlreadyAdded -> {
-                    Toast.makeText(context,
-                        getString(R.string.track_already_added, status.playlistName), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        getString(R.string.track_already_added, status.playlistName),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -206,7 +210,7 @@ class PlayerFragment : Fragment() {
             findNavController().navigateUp()
         }
 
-        binding.favouritesButton.setOnClickListener{
+        binding.favouritesButton.setOnClickListener {
             viewModel.onFavoriteClicked()
         }
     }

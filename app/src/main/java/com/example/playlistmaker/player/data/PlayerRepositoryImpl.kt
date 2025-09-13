@@ -33,6 +33,7 @@ class PlayerRepositoryImpl(private val context: Context) : PlayerRepository {
         override fun onServiceDisconnected(name: ComponentName?) {
             service = null
             bound = false
+            pendingActions.clear()
         }
     }
 

@@ -119,15 +119,12 @@ class PlayerViewModel(
         }
     }
 
-    fun pauseIfNeeded() {
-        playerInteractor.pauseIfNeeded()
-    }
-
     override fun onCleared() {
         super.onCleared()
         stopTimer()
         playerInteractor.stop()
         playerInteractor.release()
+        playerInteractor.stopForegroundIfAny()
     }
 
     fun updateNotificationMetaIfAny(track: Track?) {
@@ -150,6 +147,7 @@ class PlayerViewModel(
         }
     }
 
+
     fun onUiStopped() {
         isAppInBackground = true
         stopTimer()
@@ -164,11 +162,6 @@ class PlayerViewModel(
         }
 
         playerInteractor.refreshUiState()
-    }
-
-    fun onUiDestroyed() {
-        playerInteractor.stop()
-        playerInteractor.unbindService()
     }
 
     companion object {
