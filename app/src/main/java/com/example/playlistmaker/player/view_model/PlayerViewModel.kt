@@ -1,6 +1,5 @@
 package com.example.playlistmaker.player.view_model
 
-
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,7 +15,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
 class PlayerViewModel(
     private val playerInteractor: PlayerInteractor,
     private val favoritesInteractor: FavoritesInteractor,
@@ -24,6 +22,7 @@ class PlayerViewModel(
 ) : ViewModel() {
 
     private var timerJob: Job? = null
+    private var isAppInBackground = false
 
     private var isUrlSet = false
     private var track: Track? = null
@@ -73,7 +72,6 @@ class PlayerViewModel(
                 favoritesInteractor.deleteFavoriteTrack(currentTrack)
                 _isFavorite.postValue(false)
             }
-
         }
         currentTrack.isFavorite = _isFavorite.value ?: false
     }
@@ -98,7 +96,6 @@ class PlayerViewModel(
         }
     }
 
-
     fun setTrack(newTrack: Track) {
         if (track == null) {
             track = newTrack
@@ -113,8 +110,12 @@ class PlayerViewModel(
         playerInteractor.playbackControl()
         if (playerInteractor.isPlaying()) {
             startTimer()
+            if (isAppInBackground) {
+                playerInteractor.startForegroundIfPlaying()
+            }
         } else {
             stopTimer()
+            playerInteractor.stopForegroundIfAny()
         }
     }
 
@@ -124,12 +125,53 @@ class PlayerViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        playerInteractor.release()
         stopTimer()
+        playerInteractor.stop()
+        playerInteractor.release()
+    }
+
+    fun updateNotificationMetaIfAny(track: Track?) {
+        if (track != null) {
+            playerInteractor.setNotificationMeta(track.artistName, track.trackName)
+        }
+    }
+
+    fun onUiStarted() {
+        isAppInBackground = false
+        playerInteractor.bindService()
+        playerInteractor.stopForegroundIfAny()
+
+        viewModelScope.launch {
+            delay(100)
+            refreshUiState()
+            if (playerInteractor.isPlaying()) {
+                startTimer()
+            }
+        }
+    }
+
+    fun onUiStopped() {
+        isAppInBackground = true
+        stopTimer()
+        if (playerInteractor.isPlaying()) {
+            playerInteractor.startForegroundIfPlaying()
+        }
+    }
+
+    fun refreshUiState() {
+        if (playerInteractor.isPlaying()) {
+            playerInteractor.updateCurrentTime()
+        }
+
+        playerInteractor.refreshUiState()
+    }
+
+    fun onUiDestroyed() {
+        playerInteractor.stop()
+        playerInteractor.unbindService()
     }
 
     companion object {
         private const val TIME_UPDATE_INTERVAL = 330L
     }
-
 }

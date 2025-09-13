@@ -20,8 +20,8 @@ class PlayerInteractorImpl(
             _playerState.value = PlayerState.Prepared(repository.formatTime(0))
         }
         repository.setOnCompletionListener {
-            _playerState.value = PlayerState.Prepared(repository.formatTime(0))
             _playerState.value = PlayerState.Paused
+            _playerState.value = PlayerState.Prepared(repository.formatTime(0))
         }
     }
 
@@ -35,7 +35,6 @@ class PlayerInteractorImpl(
     private fun play() {
         repository.start()
         _playerState.value = PlayerState.Playing
-
     }
 
     private fun pause() {
@@ -49,6 +48,11 @@ class PlayerInteractorImpl(
         }
     }
 
+    override fun stop() {
+        repository.stop()
+        _playerState.value = PlayerState.Prepared(repository.formatTime(0))
+    }
+
     override fun release() {
         repository.release()
         _playerState.value = PlayerState.Prepared(repository.formatTime(0))
@@ -56,10 +60,41 @@ class PlayerInteractorImpl(
 
     override fun updateCurrentTime() {
         if(isPlaying()){
-        _playerState.postValue(PlayerState.TimeUpdated(repository.getCurrentTimeFormatted()))
-            }
+            _playerState.postValue(PlayerState.TimeUpdated(repository.getCurrentTimeFormatted()))
+        }
+    }
+
+    override fun setNotificationMeta(artist: String, title: String) {
+        repository.setNotificationMeta(artist, title)
+    }
+
+    override fun startForegroundIfPlaying() {
+        repository.startForegroundIfPlaying()
+    }
+
+    override fun stopForegroundIfAny() {
+        repository.stopForegroundIfAny()
     }
 
     override fun isPlaying(): Boolean = repository.isPlaying()
 
+    override fun refreshUiState() {
+        val currentTime = repository.getCurrentTimeFormatted()
+
+        _playerState.value = if (repository.isPlaying()) {
+            PlayerState.Playing
+        } else {
+            PlayerState.Paused
+        }
+
+        _playerState.value = PlayerState.TimeUpdated(currentTime)
+    }
+
+    override fun bindService() {
+        repository.bindService()
+    }
+
+    override fun unbindService() {
+        repository.unbindService()
+    }
 }
