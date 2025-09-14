@@ -22,6 +22,8 @@ materialVersion = "1.8.0"
 moxyVersion = "2.2.2"
 navigationFragmentKtx = "2.5.3"
 roomRuntime = "2.6.1"
+lifecycleProcess = "2.9.3"
+lifecycleViewmodelKtx = "2.9.3"
 
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
@@ -52,6 +54,8 @@ moxy = { module = "com.github.moxy-community:moxy", version.ref = "moxyVersion" 
 moxy-android = { module = "com.github.moxy-community:moxy-android", version.ref = "moxyVersion" }
 moxy-compiler = { module = "com.github.moxy-community:moxy-compiler", version.ref = "moxyVersion" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converterGson" }
+androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

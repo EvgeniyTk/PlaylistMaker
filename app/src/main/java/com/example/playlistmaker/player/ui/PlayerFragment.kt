@@ -1,12 +1,12 @@
 package com.example.playlistmaker.player.ui
 
-
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -32,6 +32,19 @@ import java.util.Locale
 class PlayerFragment : Fragment() {
     private val viewModel by viewModel<PlayerViewModel>()
 
+    private val requestNotifPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            // Permission granted
+        } else {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.request_permission), Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     private var _binding: FragmentPlayerBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: PlaylistInPlayerAdapter
@@ -45,8 +58,39 @@ class PlayerFragment : Fragment() {
         return binding.root
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.onUiStarted()
+    }
+
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.onUiStopped()
+    }
+
+    private fun hasPostNotificationsPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        } else true
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        val needPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                !hasPostNotificationsPermission()
+
+        if (needPermission) {
+            requestNotifPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        requestNotificationPermissionIfNeeded()
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -60,7 +104,7 @@ class PlayerFragment : Fragment() {
 
         val bottomSheetContainer = binding.standardBottomSheet
         val scrim = binding.bottomSheetScrim
-        val bottomSheetBehavior =  BottomSheetBehavior.from(bottomSheetContainer).apply {
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetContainer).apply {
             state = BottomSheetBehavior.STATE_HIDDEN
         }
 
@@ -73,33 +117,32 @@ class PlayerFragment : Fragment() {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
 
-        binding.addPlaylistInPlayerButton.setOnClickListener{
+        binding.addPlaylistInPlayerButton.setOnClickListener {
             findNavController().navigate(R.id.action_playerFragment_to_newPlaylistFragment)
         }
 
-        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        bottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                     scrim.isVisible = false
                 } else {
                     scrim.isVisible = true
                 }
-
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 scrim.isVisible = true
                 scrim.alpha = slideOffset + 0.5f
             }
-
         })
-
 
         viewModel.playerUiState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is PlayerState.Prepared -> {
                     binding.playButton.isEnabled = true
                     binding.timePlay.text = state.initialTime
+                    binding.playButton.setPlaying(false)
                 }
 
                 is PlayerState.Playing -> {
@@ -116,44 +159,47 @@ class PlayerFragment : Fragment() {
             }
         }
 
-        viewModel.isFavorite.observe(viewLifecycleOwner) {
-            if (it) {
+        viewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
+            if (isFavorite) {
                 binding.favouritesButton.setImageResource(R.drawable.favorite_true)
             } else {
                 binding.favouritesButton.setImageResource(R.drawable.favorite_false)
             }
         }
 
-        viewModel.playlists.observe(viewLifecycleOwner){
-            showPlaylists(it)
+        viewModel.playlists.observe(viewLifecycleOwner) { playlists ->
+            showPlaylists(playlists)
         }
 
         viewModel.addTrackStatus.observe(viewLifecycleOwner) { status ->
-            when(status) {
+            when (status) {
                 is AddTrackStatus.Success -> {
-                    Toast.makeText(requireContext(),
-                        getString(R.string.added_track_in_playlist, status.playlistName), Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.added_track_in_playlist, status.playlistName),
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                     bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
                 }
+
                 is AddTrackStatus.AlreadyAdded -> {
-                    Toast.makeText(context,
-                        getString(R.string.track_already_added, status.playlistName), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        getString(R.string.track_already_added, status.playlistName),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
 
-        val track: Track? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requireArguments().getParcelable(ARGS_TRACK, Track::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            requireArguments().getParcelable(ARGS_TRACK)
-        }
+        val track: Track? = getPassedTrack()
 
         if (track != null) {
             bindTrack(track)
             viewModel.setTrack(track)
             viewModel.setUrl(track.previewUrl)
+            viewModel.updateNotificationMetaIfAny(track)
         }
 
         binding.playButton.setOnPlaybackClickListener {
@@ -164,11 +210,9 @@ class PlayerFragment : Fragment() {
             findNavController().navigateUp()
         }
 
-        binding.favouritesButton.setOnClickListener{
+        binding.favouritesButton.setOnClickListener {
             viewModel.onFavoriteClicked()
         }
-
-
     }
 
     private fun showPlaylists(list: List<Playlist>) {
@@ -194,14 +238,10 @@ class PlayerFragment : Fragment() {
             binding.collectionValue.text = track.collectionName
         }
 
-        binding.releaseDateValue.text = track.releaseDate.substring(0, 4)
+        val year = track.releaseDate.let { if (it.length >= 4) it.substring(0, 4) else "—" }
+        binding.releaseDateValue.text = year
         binding.genreValue.text = track.primaryGenreName
         binding.countryValue.text = track.country
-    }
-
-    override fun onPause() {
-        super.onPause()
-        viewModel.pauseIfNeeded()
     }
 
     override fun onDestroyView() {
@@ -210,9 +250,17 @@ class PlayerFragment : Fragment() {
         _binding = null
     }
 
+    private fun getPassedTrack(): Track? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requireArguments().getParcelable(ARGS_TRACK, Track::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            requireArguments().getParcelable(ARGS_TRACK)
+        }
+    }
+
     companion object {
         private const val ARGS_TRACK = "track"
         fun createArgs(track: Track): Bundle = bundleOf(ARGS_TRACK to track)
-
     }
 }

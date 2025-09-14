@@ -50,6 +50,8 @@
     <string name="edit_playlist">Редактировать</string>
     <string name="save">Сохранить</string>
     <string name="no_tracks_in_playlist">В этом плейлисте нет списка треков</string>
+    <string name="playback_channel_name">Playback</string>
+    <string name="request_permission">В разрешении на уведомления отказано. Вы не увидите уведомления о воспроизведении, когда приложение свёрнуто.</string>
     <plurals name="track_count">
         <item quantity="one">%d трек</item>
         <item quantity="few">%d трека</item>
