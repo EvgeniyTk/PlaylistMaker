@@ -15,6 +15,8 @@ import com.example.playlistmaker.search.domain.models.TracksResponse
 import com.example.playlistmaker.search.ui.models.TracksState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
@@ -28,8 +30,15 @@ class SearchViewModel(
     private val stateLiveData = MutableLiveData<TracksState>()
     fun observeState(): LiveData<TracksState> = stateLiveData
 
+    private val _stateFlow = MutableStateFlow<TracksState>(TracksState.Loading)
+    fun observeStateFlow(): StateFlow<TracksState> = _stateFlow
+
+    private val _queryFlow = MutableStateFlow(SEARCH_TEXT_VALUE)
+    fun observeQueryFlow(): StateFlow<String> = _queryFlow
+
     private fun renderState(state: TracksState) {
         stateLiveData.postValue(state)
+        _stateFlow.value = state
     }
 
     private val _hideKeyboardEvent = SingleLiveEvent<Boolean>()
@@ -94,6 +103,8 @@ class SearchViewModel(
     }
 
     fun onClearInputText() {
+        searchTextValue = ""
+        _queryFlow.value = ""
         renderState(TracksState.History(trackListHistory))
     }
 
@@ -118,6 +129,7 @@ class SearchViewModel(
 
     fun onSearchTextChanged(newText: String) {
         searchTextValue = newText
+        _queryFlow.value = newText
     }
 
 
@@ -127,6 +139,7 @@ class SearchViewModel(
 
     fun restoreInstanceState(savedInstanceState: Bundle) {
         searchTextValue = savedInstanceState.getString(SEARCH_TEXT_KEY, SEARCH_TEXT_VALUE)
+        _queryFlow.value = searchTextValue
     }
 
 
@@ -196,6 +209,7 @@ class SearchViewModel(
 
         }
     }
+    fun currentQuery(): String = searchTextValue
 
 
     companion object {
