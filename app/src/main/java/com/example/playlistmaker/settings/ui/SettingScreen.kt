@@ -10,9 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -26,7 +23,6 @@ import androidx.compose.ui.unit.sp
 import com.example.playlistmaker.R
 import com.example.playlistmaker.theme.AppTheme
 import com.example.playlistmaker.theme.LocalAppExtraColors
-import com.google.android.material.switchmaterial.SwitchMaterial
 
 private val YSDisplayRegular = FontFamily(Font(R.font.ys_display_regular, weight = FontWeight.Normal))
 private val YSDisplayMedium = FontFamily(Font(R.font.ys_display_medium, weight = FontWeight.Medium))
@@ -93,7 +89,11 @@ private fun SettingsToolbar() {
             containerColor = MaterialTheme.colorScheme.secondary,
             titleContentColor = LocalAppExtraColors.current.textColorSecondary
         ),
-        modifier = Modifier.heightIn(dimenDp(R.dimen.height_toolbar)).padding(bottom = 12.dp)
+        modifier = Modifier
+            .heightIn(dimenDp(R.dimen.height_toolbar))
+            .padding(bottom = 12.dp),
+
+        windowInsets = WindowInsets(0,0,0,0)
     )
 }
 
