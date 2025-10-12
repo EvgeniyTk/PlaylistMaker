@@ -137,7 +137,7 @@ fun CustomSwitch2(
 
     Box(
         modifier = Modifier
-            .size(width = trackWidth, height = thumbDiameter) // Увеличиваем высоту контейнера
+            .size(width = trackWidth, height = thumbDiameter)
             .clickable { onCheckedChange(!checked) }
     ) {
         // Трек (фон)

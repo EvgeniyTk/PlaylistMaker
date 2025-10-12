@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import com.example.playlistmaker.R
 
-// Доп. палитра для ваших нестандартных атрибутов из XML
+
 data class AppExtraColors(
     val textColorPrimary: Color,
     val textColorSecondary: Color,
@@ -21,7 +21,6 @@ data class AppExtraColors(
     val editTextBackgroundColor: Color,
     val textColorSearchHint: Color,
     val clearButtonColor: Color,
-    // Цвета для настроек
     val switchThumbColor: Color,
     val switchTrackColor: Color,
     val settingsItemColor: Color
@@ -65,7 +64,6 @@ private fun appLightExtraColors() = AppExtraColors(
     editTextBackgroundColor = colorResource(R.color.edittext_background),
     textColorSearchHint = colorResource(R.color.grey),
     clearButtonColor = colorResource(R.color.clear_button_color),
-    // Светлая тема для настроек
     switchThumbColor = colorResource(R.color.switch_thumb_color),
     switchTrackColor = colorResource(R.color.switch_track_color),
     settingsItemColor = colorResource(R.color.black_app)
@@ -81,7 +79,6 @@ private fun appDarkExtraColors() = AppExtraColors(
     editTextBackgroundColor = colorResource(R.color.white),
     textColorSearchHint = colorResource(R.color.black_app),
     clearButtonColor = colorResource(R.color.black_app),
-    // Темная тема для настроек
     switchThumbColor = colorResource(R.color.switch_thumb_color),
     switchTrackColor = colorResource(R.color.switch_track_color),
     settingsItemColor = colorResource(R.color.white)

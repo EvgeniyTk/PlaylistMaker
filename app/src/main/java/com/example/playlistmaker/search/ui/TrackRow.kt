@@ -4,11 +4,13 @@ import androidx.annotation.DimenRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -23,7 +25,6 @@ import coil.compose.AsyncImage
 import com.example.playlistmaker.R
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.theme.AppTheme
-import com.example.playlistmaker.theme.LocalAppExtraColors
 import com.example.playlistmaker.util.formatMillis
 
 private val YSDisplayRegular = FontFamily(Font(R.font.ys_display_regular, weight = FontWeight.Normal))
@@ -32,7 +33,6 @@ fun TrackRow(
     track: Track,
     onClick: () -> Unit
 ) {
-    val colors = LocalAppExtraColors.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -48,7 +48,9 @@ fun TrackRow(
             placeholder = painterResource(R.drawable.track_placeholder),
             error = painterResource(R.drawable.track_placeholder),
             contentDescription = null,
-            modifier = Modifier.size(dimenDp(R.dimen.size_track_image)),
+            modifier = Modifier
+                .size(dimenDp(R.dimen.size_track_image))
+                .clip(RoundedCornerShape(2.dp)),
             contentScale = ContentScale.Crop
         )
 
