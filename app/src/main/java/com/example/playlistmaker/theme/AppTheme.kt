@@ -9,6 +9,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import com.example.playlistmaker.R
 
 
@@ -29,6 +32,15 @@ data class AppExtraColors(
 val LocalAppExtraColors = staticCompositionLocalOf<AppExtraColors> {
     error("No AppExtraColors provided")
 }
+
+val YSDisplayRegular = FontFamily(
+    Font(R.font.ys_display_regular, weight = FontWeight.Normal)
+)
+
+val YSDisplayMedium = FontFamily(
+    Font(R.font.ys_display_medium, weight = FontWeight.Medium)
+)
+
 
 @Composable
 private fun appLightColorScheme() = lightColorScheme(

@@ -14,8 +14,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,9 +21,8 @@ import androidx.compose.ui.unit.sp
 import com.example.playlistmaker.R
 import com.example.playlistmaker.theme.AppTheme
 import com.example.playlistmaker.theme.LocalAppExtraColors
-
-private val YSDisplayRegular = FontFamily(Font(R.font.ys_display_regular, weight = FontWeight.Normal))
-private val YSDisplayMedium = FontFamily(Font(R.font.ys_display_medium, weight = FontWeight.Medium))
+import com.example.playlistmaker.theme.YSDisplayMedium
+import com.example.playlistmaker.theme.YSDisplayRegular
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,7 +90,7 @@ private fun SettingsToolbar() {
             .heightIn(dimenDp(R.dimen.height_toolbar))
             .padding(bottom = 12.dp),
 
-        windowInsets = WindowInsets(0,0,0,0)
+        windowInsets = remember { WindowInsets(0,0,0,0) }
     )
 }
 
@@ -210,7 +207,7 @@ private fun dimenSp(@DimenRes id: Int) = dimenDp(id).value.sp
 
 @Preview(showBackground = true)
 @Composable
-fun SettingsScreenLightPreview() {
+private fun SettingsScreenLightPreview() {
     AppTheme(useDarkTheme = false) {
         SettingsScreen(
             isDarkTheme = false,
@@ -224,7 +221,7 @@ fun SettingsScreenLightPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun SettingsScreenDarkPreview() {
+private fun SettingsScreenDarkPreview() {
     AppTheme(useDarkTheme = true) {
         SettingsScreen(
             isDarkTheme = true,
@@ -238,7 +235,7 @@ fun SettingsScreenDarkPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun SettingsToolbarPreview() {
+private fun SettingsToolbarPreview() {
     AppTheme {
         SettingsToolbar()
     }
@@ -246,7 +243,7 @@ fun SettingsToolbarPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun ThemeSwitchPreview() {
+private fun ThemeSwitchPreview() {
     AppTheme {
         Column {
             ThemeSwitch(
@@ -263,7 +260,7 @@ fun ThemeSwitchPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun SettingsItemPreview() {
+private fun SettingsItemPreview() {
     AppTheme {
         Column {
             SettingsItem(

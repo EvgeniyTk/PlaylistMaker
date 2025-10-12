@@ -17,8 +17,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -37,12 +35,11 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.LayoutDirection
 import com.example.playlistmaker.theme.LocalAppExtraColors
-
-private val YSDisplayRegular =
-    FontFamily(Font(R.font.ys_display_regular, weight = FontWeight.Normal))
-private val YSDisplayMedium = FontFamily(Font(R.font.ys_display_medium, weight = FontWeight.Medium))
+import com.example.playlistmaker.theme.YSDisplayMedium
+import com.example.playlistmaker.theme.YSDisplayRegular
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +79,7 @@ fun SearchScreen(
             )
         },
         containerColor = MaterialTheme.colorScheme.secondary,
-        contentWindowInsets = WindowInsets(0,0,0,0)
+        contentWindowInsets = remember { WindowInsets(0,0,0,0) }
 
         ) { innerPadding ->
         Column(
@@ -353,180 +350,11 @@ private fun dimenSp(@DimenRes id: Int) = dimenDp(id).value.sp
 
 @Preview(showBackground = true)
 @Composable
-fun SearchScreenContentPreview() {
-    val dummyTracks = listOf(
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 1,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        ),
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 2,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        ),
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 3,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        ),
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 4,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        ),
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 5,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        ),
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 6,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        ),
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 7,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        ),
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 8,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        ),
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 9,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        ),
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 10,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        ),
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 11,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        ),
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 12,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        ),
-        Track(
-            trackName = "Song Title",
-            artistName = "Artist Name",
-            trackTimeMillis = 215000,
-            artworkUrl100 = "drawable://${R.drawable.track_placeholder}",
-            trackId = 13,
-            collectionName = "1",
-            releaseDate = "1990",
-            primaryGenreName = "TODO()",
-            country = "TODO()",
-            isFavorite = true,
-            previewUrl = "TODO()"
-        )
-    )
+private fun SearchScreenContentPreview(
+    @PreviewParameter(TracksPreviewProvider::class) tracks: List<Track>
+) {
 
-    val dummyStateFlow = remember { MutableStateFlow(TracksState.Content(dummyTracks)) }
+    val dummyStateFlow = remember { MutableStateFlow(TracksState.Content(tracks)) }
     val dummyQueryFlow = remember { MutableStateFlow("") }
 
     AppTheme {
@@ -545,7 +373,7 @@ fun SearchScreenContentPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun SearchScreenHistoryPreview() {
+private fun SearchScreenHistoryPreview() {
     val dummyHistory = listOf(
         Track(
             trackName = "Song Title",
@@ -594,7 +422,7 @@ fun SearchScreenHistoryPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun SearchScreenErrorPreview() {
+private fun SearchScreenErrorPreview() {
     val dummyStateFlow = remember {
         MutableStateFlow(
             TracksState.Error(SearchViewModel.CodeError.BADCONNECTION)
@@ -618,7 +446,7 @@ fun SearchScreenErrorPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun SearchScreenLoadingPreview() {
+private fun SearchScreenLoadingPreview() {
     val dummyStateFlow = remember { MutableStateFlow(TracksState.Loading) }
     val dummyQueryFlow = remember { MutableStateFlow("") }
 

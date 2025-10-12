@@ -14,9 +14,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,9 +22,9 @@ import coil.compose.AsyncImage
 import com.example.playlistmaker.R
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.theme.AppTheme
+import com.example.playlistmaker.theme.YSDisplayRegular
 import com.example.playlistmaker.util.formatMillis
 
-private val YSDisplayRegular = FontFamily(Font(R.font.ys_display_regular, weight = FontWeight.Normal))
 @Composable
 fun TrackRow(
     track: Track,
@@ -108,7 +105,7 @@ fun TrackRow(
 
 @Preview(showBackground = true)
 @Composable
-fun TrackRowPreview() {
+private fun TrackRowPreview() {
     val sampleTrack = Track(
         trackName = "Song Title",
         artistName = "Artist Name",

@@ -16,8 +16,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,8 +25,7 @@ import com.example.playlistmaker.library.ui.models.FavoriteTracksState
 import com.example.playlistmaker.search.domain.models.Track
 import com.example.playlistmaker.search.ui.TrackRow
 import com.example.playlistmaker.theme.AppTheme
-
-private val YSDisplayMedium = FontFamily(Font(R.font.ys_display_medium, weight = FontWeight.Medium))
+import com.example.playlistmaker.theme.YSDisplayMedium
 
 @Composable
 fun FavoriteTracksScreen(
@@ -80,11 +77,13 @@ private fun TracksList(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                top = dimensionResource(id = R.dimen.margin_track),
-            ),
+            .padding(top = dimensionResource(id = R.dimen.margin_track))
     ) {
-        items(tracks, key = { it.trackId }) { track ->
+        items(
+            items = tracks,
+            key = { it.trackId },
+            contentType = { "track" }
+        ) { track ->
             TrackRow(
                 track = track,
                 onClick = { onTrackClick(track) }

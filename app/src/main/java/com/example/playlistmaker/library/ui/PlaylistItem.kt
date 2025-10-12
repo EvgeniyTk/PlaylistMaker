@@ -11,8 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,9 +22,7 @@ import com.example.playlistmaker.R
 import com.example.playlistmaker.library.domain.model.Playlist
 import com.example.playlistmaker.theme.AppTheme
 import com.example.playlistmaker.theme.LocalAppExtraColors
-
-private val YSDisplayRegular =
-    FontFamily(Font(R.font.ys_display_regular, weight = FontWeight.Normal))
+import com.example.playlistmaker.theme.YSDisplayRegular
 
 @Composable
 fun PlaylistItem(
@@ -76,7 +73,11 @@ fun PlaylistItem(
         )
 
         Text(
-            text = "${playlist.tracksCount} треков",
+            text = pluralStringResource(
+                id = R.plurals.track_count,
+                count = playlist.tracksCount,
+                playlist.tracksCount
+            ),
             modifier = Modifier.fillMaxWidth(),
             maxLines = 1,
             fontFamily = YSDisplayRegular,
@@ -100,7 +101,7 @@ private fun PlaylistItemPreview() {
                 playlistDescription = "My favorite tracks",
                 imagePath = "drawable://${R.drawable.track_placeholder}",
                 trackIdList = emptyList(),
-                tracksCount = 98
+                tracksCount = 1
             )
         )
     }
