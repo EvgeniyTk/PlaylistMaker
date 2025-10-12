@@ -4,45 +4,48 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
 import com.example.playlistmaker.R
-import com.example.playlistmaker.databinding.FragmentPlaylistsBinding
 import com.example.playlistmaker.library.domain.model.Playlist
 import com.example.playlistmaker.library.ui.models.PlaylistsState
 import com.example.playlistmaker.library.view_model.PlaylistsViewModel
+import com.example.playlistmaker.theme.AppTheme
 import com.example.playlistmaker.util.debounce
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PlaylistsFragment : Fragment() {
 
-    private lateinit var adapter: PlaylistAdapter
     private lateinit var onPlaylistClickDebounce: (Playlist) -> Unit
     private val viewModel: PlaylistsViewModel by viewModel()
-    private var _binding: FragmentPlaylistsBinding? = null
-    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentPlaylistsBinding.inflate(inflater, container, false)
-
-        viewModel.observeState().observe(viewLifecycleOwner) {
-            render(it)
+        return ComposeView(requireContext()).apply {
+            setContent {
+                val state by viewModel.observeState().observeAsState(initial = PlaylistsState.Empty)
+                AppTheme {
+                    PlaylistsScreen(
+                        state = state,
+                        onNewPlaylistClick = {
+                            findNavController().navigate(R.id.action_libraryFragment_to_newPlaylistFragment)
+                        },
+                        onPlaylistClick = onPlaylistClickDebounce
+                    )
+                }
+            }
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.newPlaylistButton.setOnClickListener {
-            findNavController().navigate(R.id.action_libraryFragment_to_newPlaylistFragment)
-        }
 
         onPlaylistClickDebounce = debounce<Playlist>(
             CLICK_DEBOUNCE_DELAY,
@@ -57,42 +60,6 @@ class PlaylistsFragment : Fragment() {
                 bundle
             )
         }
-
-        adapter = PlaylistAdapter { onPlaylistClickDebounce(it) }
-        binding.playlistsRv.layoutManager = GridLayoutManager(requireContext(), 2)
-        binding.playlistsRv.adapter = adapter
-    }
-
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    private fun showPlaceholder() {
-        binding.newPlaylistButton.isVisible = true
-        binding.playlistsPlaceholderIV.isVisible = true
-        binding.playlistsPlaceholderTV.isVisible = true
-        binding.playlistsRv.isVisible = false
-    }
-
-    private fun render(state: PlaylistsState) {
-        when (state) {
-            is PlaylistsState.Empty -> showPlaceholder()
-            is PlaylistsState.Content -> showContent(state.playlists)
-        }
-    }
-
-    private fun showContent(list: List<Playlist>) {
-        binding.newPlaylistButton.isVisible = true
-        binding.playlistsPlaceholderIV.isVisible = false
-        binding.playlistsPlaceholderTV.isVisible = false
-        showPlaylists(list)
-    }
-
-    private fun showPlaylists(list: List<Playlist>) {
-        adapter.updateData(list)
-        binding.playlistsRv.isVisible = list.isNotEmpty()
     }
 
     companion object {
@@ -101,6 +68,5 @@ class PlaylistsFragment : Fragment() {
         }
         private const val CLICK_DEBOUNCE_DELAY = 330L
         const val KEY = "playlistId"
-
     }
 }

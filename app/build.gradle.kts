@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.playlistmaker"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.playlistmaker"
@@ -21,6 +21,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        compose = true
     }
 
     buildTypes {
@@ -39,6 +40,10 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.11"
+    }
 }
 
 val moxyVersion = "2.2.2"
@@ -53,6 +58,8 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -75,4 +82,33 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+    val composeBom = platform("androidx.compose:compose-bom:2025.09.01")
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
+    // or skip Material Design and build directly on top of foundational components
+    implementation(libs.androidx.foundation)
+    // or only import the main APIs for the underlying toolkit systems,
+    // such as input and measurement/layout
+    implementation(libs.ui)
+
+    // Android Studio Preview support
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
+
+    // UI Tests
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Optional - Add window size utils
+    implementation(libs.androidx.adaptive)
+
+    // Optional - Integration with activities
+    implementation(libs.androidx.activity.compose)
+    // Optional - Integration with ViewModels
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    // Optional - Integration with LiveData
+    implementation(libs.androidx.runtime.livedata)
+    // Optional - Integration with RxJava
+    implementation(libs.androidx.runtime.rxjava2)
+    implementation(libs.coil.compose)
 }
